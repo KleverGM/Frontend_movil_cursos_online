@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/courses/presentation/pages/course_detail_page.dart';
 import '../../features/courses/presentation/pages/courses_page.dart';
 
 /// Rutas de la aplicación
@@ -47,6 +48,13 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.courses,
         builder: (context, state) => const CoursesPage(),
+      ),
+      GoRoute(
+        path: '/courses/:id',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return CourseDetailPage(courseId: id);
+        },
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

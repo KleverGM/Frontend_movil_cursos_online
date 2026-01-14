@@ -52,7 +52,9 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = response.data as List<dynamic>;
+      // La API devuelve un objeto con paginación: {count, next, previous, results}
+      final responseData = response.data as Map<String, dynamic>;
+      final List<dynamic> data = responseData['results'] as List<dynamic>;
       return data.map((json) => CourseModel.fromJson(json as Map<String, dynamic>)).toList();
     } else {
       throw Exception('Error al obtener cursos: ${response.statusCode}');
