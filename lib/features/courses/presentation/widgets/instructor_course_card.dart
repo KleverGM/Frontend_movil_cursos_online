@@ -8,6 +8,7 @@ import '../bloc/course_state.dart';
 import '../pages/course_enrollments_page.dart';
 import '../pages/course_stats_page.dart';
 import '../pages/course_form_page.dart';
+import '../pages/manage_modules_page.dart';
 
 /// Tarjeta de curso para instructores con acciones adicionales
 class InstructorCourseCard extends StatelessWidget {
@@ -315,6 +316,19 @@ class InstructorCourseCard extends StatelessWidget {
                 foregroundColor: theme.colorScheme.primary,
               ),
             ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.dashboard_customize, size: 20),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ManageModulesPage(course: course),
+                ),
+              );
+            },
+            tooltip: 'Gestionar módulos',
+            color: Colors.purple,
           ),
           IconButton(
             icon: const Icon(Icons.edit, size: 20),

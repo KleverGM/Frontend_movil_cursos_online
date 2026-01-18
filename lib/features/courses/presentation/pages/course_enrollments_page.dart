@@ -88,6 +88,11 @@ class _CourseEnrollmentsPageState extends State<CourseEnrollmentsPage> {
                 backgroundColor: Colors.red,
               ),
             );
+          } else if (state is InstructorEnrollmentsLoaded) {
+            // Usar addPostFrameCallback para evitar setState durante build
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _filterEnrollments(state.enrollments);
+            });
           }
         },
         builder: (context, state) {
@@ -96,7 +101,6 @@ class _CourseEnrollmentsPageState extends State<CourseEnrollmentsPage> {
           }
 
           if (state is InstructorEnrollmentsLoaded) {
-            _filterEnrollments(state.enrollments);
             
             if (_allEnrollments.isEmpty) {
               return _buildEmptyState();

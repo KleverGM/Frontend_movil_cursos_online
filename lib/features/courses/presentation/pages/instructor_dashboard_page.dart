@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../notices/presentation/pages/notices_page.dart';
+import '../../../notices/presentation/bloc/notice_bloc.dart';
+import '../../../../core/di/injection.dart';
 import '../../domain/entities/course.dart';
 import '../bloc/course_bloc.dart';
 import '../bloc/course_event.dart';
@@ -43,6 +46,20 @@ class _InstructorDashboardPageState extends State<InstructorDashboardPage> {
         title: const Text('Dashboard de Instructor'),
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => BlocProvider(
+                    create: (context) => getIt<NoticeBloc>(),
+                    child: const NoticesPage(),
+                  ),
+                ),
+              );
+            },
+            tooltip: 'Avisos',
+          ),
           IconButton(
             icon: const Icon(Icons.people),
             onPressed: () {

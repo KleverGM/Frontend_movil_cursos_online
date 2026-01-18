@@ -15,8 +15,11 @@ import '../../features/auth/domain/usecases/logout_usecase.dart';
 import '../../features/auth/domain/usecases/register_usecase.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/courses/data/datasources/course_remote_datasource.dart';
+import '../../features/courses/data/datasources/module_remote_datasource.dart';
 import '../../features/courses/data/repositories/course_repository_impl.dart';
+import '../../features/courses/data/repositories/module_repository_impl.dart';
 import '../../features/courses/domain/repositories/course_repository.dart';
+import '../../features/courses/domain/repositories/module_repository.dart';
 import '../../features/courses/domain/usecases/create_course_usecase.dart';
 import '../../features/courses/domain/usecases/delete_course_usecase.dart';
 import '../../features/courses/domain/usecases/enroll_in_course_usecase.dart';
@@ -29,7 +32,13 @@ import '../../features/courses/domain/usecases/mark_section_completed.dart';
 import '../../features/courses/domain/usecases/update_course_usecase.dart';
 import '../../features/courses/domain/usecases/get_course_stats_usecase.dart';
 import '../../features/courses/domain/usecases/toggle_course_status.dart';
+import '../../features/courses/domain/usecases/get_modules_by_course.dart';
+import '../../features/courses/domain/usecases/create_module.dart';
+import '../../features/courses/domain/usecases/update_module.dart';
+import '../../features/courses/domain/usecases/delete_module.dart';
 import '../../features/courses/presentation/bloc/course_bloc.dart';
+import '../../features/courses/presentation/bloc/module_bloc.dart';
+import '../../features/courses/presentation/bloc/module_event.dart';
 import '../../features/reviews/data/datasources/review_remote_datasource.dart';
 import '../../features/reviews/data/repositories/review_repository_impl.dart';
 import '../../features/reviews/domain/repositories/review_repository.dart';
@@ -40,6 +49,14 @@ import '../../features/reviews/domain/usecases/get_course_reviews.dart';
 import '../../features/reviews/domain/usecases/mark_review_helpful.dart';
 import '../../features/reviews/domain/usecases/reply_to_review.dart';
 import '../../features/reviews/presentation/bloc/review_bloc.dart';
+import '../../features/notices/data/datasources/notice_remote_datasource.dart';
+import '../../features/notices/data/repositories/notice_repository_impl.dart';
+import '../../features/notices/domain/repositories/notice_repository.dart';
+import '../../features/notices/domain/usecases/create_notice.dart';
+import '../../features/notices/domain/usecases/delete_notice.dart';
+import '../../features/notices/domain/usecases/get_my_notices.dart';
+import '../../features/notices/domain/usecases/mark_notice_as_read.dart';
+import '../../features/notices/presentation/bloc/notice_bloc.dart';
 import '../network/api_client.dart';
 import '../network/dio_interceptor.dart';
 import '../network/network_info.dart';
@@ -188,6 +205,37 @@ Future<void> initializeDependencies() async {
     ),
   );
 
+  // ============== Features - Modules ==============
+  
+  // DataSources
+  getIt.registerLazySingleton<ModuleRemoteDataSource>(
+    () => ModuleRemoteDataSourceImpl(getIt<ApiClient>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<ModuleRepository>(
+    () => ModuleRepositoryImpl(
+      getIt<ModuleRemoteDataSource>(),
+      getIt<NetworkInfo>(),
+    ),
+  );
+
+  // Use Cases
+  getIt.registerLazySingleton(() => GetModulesByCourseUseCase(getIt<ModuleRepository>()));
+  getIt.registerLazySingleton(() => CreateModuleUseCase(getIt<ModuleRepository>()));
+  getIt.registerLazySingleton(() => UpdateModuleUseCase(getIt<ModuleRepository>()));
+  getIt.registerLazySingleton(() => DeleteModuleUseCase(getIt<ModuleRepository>()));
+
+  // BLoC
+  getIt.registerFactory(
+    () => ModuleBloc(
+      getIt<GetModulesByCourseUseCase>(),
+      getIt<CreateModuleUseCase>(),
+      getIt<UpdateModuleUseCase>(),
+      getIt<DeleteModuleUseCase>(),
+    ),
+  );
+
   // ============== Features - Reviews ==============
   
   // DataSources
@@ -220,6 +268,37 @@ Future<void> initializeDependencies() async {
       getIt<MarkReviewHelpful>(),
       getIt<DeleteReview>(),
       getIt<ReplyToReview>(),
+    ),
+  );
+
+  // ============== Features - Notices ==============
+  
+  // DataSources
+  getIt.registerLazySingleton<NoticeRemoteDataSource>(
+    () => NoticeRemoteDataSourceImpl(getIt<ApiClient>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<NoticeRepository>(
+    () => NoticeRepositoryImpl(
+      getIt<NoticeRemoteDataSource>(),
+      getIt<NetworkInfo>(),
+    ),
+  );
+
+  // Use Cases
+  getIt.registerLazySingleton(() => GetMyNoticesUseCase(getIt<NoticeRepository>()));
+  getIt.registerLazySingleton(() => MarkNoticeAsReadUseCase(getIt<NoticeRepository>()));
+  getIt.registerLazySingleton(() => DeleteNoticeUseCase(getIt<NoticeRepository>()));
+  getIt.registerLazySingleton(() => CreateNoticeUseCase(getIt<NoticeRepository>()));
+
+  // BLoC
+  getIt.registerFactory(
+    () => NoticeBloc(
+      getIt<GetMyNoticesUseCase>(),
+      getIt<MarkNoticeAsReadUseCase>(),
+      getIt<DeleteNoticeUseCase>(),
+      getIt<CreateNoticeUseCase>(),
     ),
   );
 }
