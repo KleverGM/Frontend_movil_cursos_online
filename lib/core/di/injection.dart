@@ -17,12 +17,16 @@ import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/courses/data/datasources/course_remote_datasource.dart';
 import '../../features/courses/data/repositories/course_repository_impl.dart';
 import '../../features/courses/domain/repositories/course_repository.dart';
+import '../../features/courses/domain/usecases/create_course_usecase.dart';
+import '../../features/courses/domain/usecases/delete_course_usecase.dart';
 import '../../features/courses/domain/usecases/enroll_in_course_usecase.dart';
 import '../../features/courses/domain/usecases/get_course_detail_usecase.dart';
 import '../../features/courses/domain/usecases/get_courses_usecase.dart';
 import '../../features/courses/domain/usecases/get_enrolled_courses_usecase.dart';
+import '../../features/courses/domain/usecases/get_instructor_enrollments_usecase.dart';
 import '../../features/courses/domain/usecases/get_my_courses_usecase.dart';
 import '../../features/courses/domain/usecases/mark_section_completed.dart';
+import '../../features/courses/domain/usecases/update_course_usecase.dart';
 import '../../features/courses/presentation/bloc/course_bloc.dart';
 import '../../features/reviews/data/datasources/review_remote_datasource.dart';
 import '../../features/reviews/data/repositories/review_repository_impl.dart';
@@ -156,6 +160,10 @@ Future<void> initializeDependencies() async {
   getIt.registerLazySingleton(() => GetEnrolledCoursesUseCase(getIt<CourseRepository>()));
   getIt.registerLazySingleton(() => GetMyCoursesUseCase(getIt<CourseRepository>()));
   getIt.registerLazySingleton(() => MarkSectionCompleted(getIt<CourseRepository>()));
+  getIt.registerLazySingleton(() => CreateCourseUseCase(getIt<CourseRepository>()));
+  getIt.registerLazySingleton(() => UpdateCourseUseCase(getIt<CourseRepository>()));
+  getIt.registerLazySingleton(() => DeleteCourseUseCase(getIt<CourseRepository>()));
+  getIt.registerLazySingleton(() => GetInstructorEnrollmentsUseCase(getIt<CourseRepository>()));
 
   // BLoC
   getIt.registerFactory(
@@ -166,6 +174,10 @@ Future<void> initializeDependencies() async {
       getIt<GetEnrolledCoursesUseCase>(),
       getIt<GetMyCoursesUseCase>(),
       getIt<MarkSectionCompleted>(),
+      getIt<CreateCourseUseCase>(),
+      getIt<UpdateCourseUseCase>(),
+      getIt<DeleteCourseUseCase>(),
+      getIt<GetInstructorEnrollmentsUseCase>(),
     ),
   );
 

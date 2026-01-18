@@ -71,6 +71,11 @@ class CourseReviewsPage extends StatelessWidget {
               );
             }
           },
+          buildWhen: (previous, current) {
+            // Solo reconstruir cuando cambie a ReviewsLoaded o sea el primer loading
+            return current is ReviewsLoaded || 
+                   (current is ReviewLoading && previous is ReviewInitial);
+          },
           builder: (context, state) {
             if (state is ReviewLoading) {
               return const Center(child: CircularProgressIndicator());
@@ -107,7 +112,7 @@ class CourseReviewsPage extends StatelessWidget {
               ? _buildEmptyState()
               : BlocBuilder<AuthBloc, AuthState>(
                   builder: (context, authState) {
-                    final isInstructor = authState is AuthAuthenticated && 
+                    final isInstructor = authState is Authenticated && 
                                         (authState.user.isInstructor || authState.user.isAdmin);
                     
                     return ListView.builder(

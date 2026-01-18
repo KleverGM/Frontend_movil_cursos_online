@@ -6,7 +6,8 @@ import '../../domain/entities/course.dart';
 import '../bloc/course_bloc.dart';
 import '../bloc/course_event.dart';
 import '../bloc/course_state.dart';
-import '../widgets/course_card.dart';
+import '../widgets/instructor_course_card.dart';
+import 'course_enrollments_page.dart';
 
 /// Dashboard para instructores
 class InstructorDashboardPage extends StatefulWidget {
@@ -37,6 +38,19 @@ class _InstructorDashboardPageState extends State<InstructorDashboardPage> {
       appBar: AppBar(
         title: const Text('Dashboard de Instructor'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.people),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const CourseEnrollmentsPage(),
+                ),
+              );
+            },
+            tooltip: 'Ver todos los estudiantes',
+          ),
+        ],
       ),
       body: BlocListener<CourseBloc, CourseState>(
         listener: (context, state) {
@@ -150,7 +164,7 @@ class _InstructorDashboardPageState extends State<InstructorDashboardPage> {
             else
               ...courses.map((course) => Padding(
                     padding: const EdgeInsets.only(bottom: 16),
-                    child: CourseCard(course: course),
+                    child: InstructorCourseCard(course: course),
                   )),
           ],
         ),

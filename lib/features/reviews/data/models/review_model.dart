@@ -17,6 +17,19 @@ class ReviewModel extends Review {
   });
 
   factory ReviewModel.fromJson(Map<String, dynamic> json) {
+    // Extraer respuesta del instructor del array 'respuestas' si existe
+    String? respuestaInstructor;
+    DateTime? fechaRespuesta;
+    
+    final respuestas = json['respuestas'] as List?;
+    if (respuestas != null && respuestas.isNotEmpty) {
+      final primeraRespuesta = respuestas[0] as Map<String, dynamic>;
+      respuestaInstructor = primeraRespuesta['texto'] as String?;
+      if (primeraRespuesta['fecha'] != null) {
+        fechaRespuesta = DateTime.parse(primeraRespuesta['fecha'] as String);
+      }
+    }
+    
     return ReviewModel(
       id: json['id'].toString(),
       cursoId: json['curso_id'] as int,
@@ -27,10 +40,8 @@ class ReviewModel extends Review {
       fechaCreacion: DateTime.parse(json['fecha_creacion'] as String),
       utilesCount: json['util_count'] as int? ?? 0,
       marcadoUtilPorMi: (json['usuarios_util'] as List?)?.contains(json['usuario_id']) ?? false,
-      respuestaInstructor: json['respuesta_instructor'] as String?,
-      fechaRespuesta: json['fecha_respuesta'] != null 
-          ? DateTime.parse(json['fecha_respuesta'] as String) 
-          : null,
+      respuestaInstructor: respuestaInstructor,
+      fechaRespuesta: fechaRespuesta,
     );
   }
 

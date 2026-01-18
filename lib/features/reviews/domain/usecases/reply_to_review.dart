@@ -13,7 +13,7 @@ class ReplyToReview implements UseCase<Review, ReplyToReviewParams> {
   ReplyToReview(this._repository);
 
   @override
-  Future<Either<Failure, Review>> call(ReplyToReviewParams params) async {
+  Future<Either<Failure, Review>> execute(ReplyToReviewParams params) async {
     return await _repository.replyToReview(
       params.reviewId,
       params.respuesta,

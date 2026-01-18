@@ -1,11 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/usecases/usecase.dart';
+import '../../domain/usecases/create_course_usecase.dart';
+import '../../domain/usecases/delete_course_usecase.dart';
 import '../../domain/usecases/enroll_in_course_usecase.dart';
 import '../../domain/usecases/get_course_detail_usecase.dart';
 import '../../domain/usecases/get_courses_usecase.dart';
 import '../../domain/usecases/get_enrolled_courses_usecase.dart';
+import '../../domain/usecases/get_instructor_enrollments_usecase.dart';
 import '../../domain/usecases/get_my_courses_usecase.dart';
 import '../../domain/usecases/mark_section_completed.dart';
+import '../../domain/usecases/update_course_usecase.dart';
 import 'course_event.dart';
 import 'course_state.dart';
 
@@ -17,6 +21,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
   final GetEnrolledCoursesUseCase _getEnrolledCoursesUseCase;
   final GetMyCoursesUseCase _getMyCoursesUseCase;
   final MarkSectionCompleted _markSectionCompleted;
+  final CreateCourseUseCase _createCourseUseCase;
+  final UpdateCourseUseCase _updateCourseUseCase;
+  final DeleteCourseUseCase _deleteCourseUseCase;
+  final GetInstructorEnrollmentsUseCase _getInstructorEnrollmentsUseCase;
 
   CourseBloc(
     this._getCoursesUseCase,
@@ -25,6 +33,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     this._getEnrolledCoursesUseCase,
     this._getMyCoursesUseCase,
     this._markSectionCompleted,
+    this._createCourseUseCase,
+    this._updateCourseUseCase,
+    this._deleteCourseUseCase,
+    this._getInstructorEnrollmentsUseCase,
   ) : super(const CourseInitial()) {
     on<GetCoursesEvent>(_onGetCourses);
     on<GetCourseDetailEvent>(_onGetCourseDetail);
@@ -33,6 +45,10 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     on<GetMyCoursesEvent>(_onGetMyCourses);
     on<RefreshCoursesEvent>(_onRefreshCourses);
     on<MarkSectionCompletedEvent>(_onMarkSectionCompleted);
+    on<CreateCourseEvent>(_onCreateCourse);
+    on<UpdateCourseEvent>(_onUpdateCourse);
+    on<DeleteCourseEvent>(_onDeleteCourse);
+    on<GetInstructorEnrollmentsEvent>(_onGetInstructorEnrollments);
   }
 
   Future<void> _onGetCourses(
@@ -149,6 +165,85 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     result.fold(
       (failure) => emit(CourseError(failure.message)),
       (_) => emit(SectionCompletedSuccess(event.sectionId)),
+    );
+  }
+
+  Future<void> _onCreateCourse(
+    CreateCourseEvent event,
+    Emitter<CourseState> emit,
+  ) async {
+    emit(const CourseLoading());
+
+    final result = await _createCourseUseCase(
+      CreateCourseParams(
+        titulo: event.titulo,
+        descripcion: event.descripcion,
+        categoria: event.categoria,
+        nivel: event.nivel,
+        precio: event.precio,
+        imagenPath: event.imagenPath,
+      ),
+    );
+
+    result.fold(
+      (failure) => emit(CourseError(failure.message)),
+      (course) => emit(CourseCreatedSuccess(course)),
+    );
+  }
+
+  Future<void> _onUpdateCourse(
+    UpdateCourseEvent event,
+    Emitter<CourseState> emit,
+  ) async {
+    emit(const CourseLoading());
+
+    final result = await _updateCourseUseCase(
+      UpdateCourseParams(
+        courseId: event.courseId,
+        titulo: event.titulo,
+        descripcion: event.descripcion,
+        categoria: event.categoria,
+        nivel: event.nivel,
+        precio: event.precio,
+        imagenPath: event.imagenPath,
+      ),
+    );
+
+    result.fold(
+      (failure) => emit(CourseError(failure.message)),
+      (course) => emit(CourseUpdatedSuccess(course)),
+    );
+  }
+
+  Future<void> _onDeleteCourse(
+    DeleteCourseEvent event,
+    Emitter<CourseState> emit,
+  ) async {
+    emit(const CourseLoading());
+
+    final result = await _deleteCourseUseCase(
+      DeleteCourseParams(event.courseId),
+    );
+
+    result.fold(
+      (failure) => emit(CourseError(failure.message)),
+      (_) => emit(CourseDeletedSuccess(event.courseId)),
+    );
+  }
+
+  Future<void> _onGetInstructorEnrollments(
+    GetInstructorEnrollmentsEvent event,
+    Emitter<CourseState> emit,
+  ) async {
+    emit(const CourseLoading());
+
+    final result = await _getInstructorEnrollmentsUseCase(
+      GetInstructorEnrollmentsParams(courseId: event.courseId),
+    );
+
+    result.fold(
+      (failure) => emit(CourseError(failure.message)),
+      (enrollments) => emit(InstructorEnrollmentsLoaded(enrollments)),
     );
   }
 }

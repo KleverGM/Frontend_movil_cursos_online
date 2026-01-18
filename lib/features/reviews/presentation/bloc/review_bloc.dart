@@ -106,7 +106,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
   ) async {
     emit(const ReviewLoading());
 
-    final result = await _replyToReview(
+    final result = await _replyToReview.execute(
       ReplyToReviewParams(
         reviewId: event.reviewId,
         respuesta: event.respuesta,

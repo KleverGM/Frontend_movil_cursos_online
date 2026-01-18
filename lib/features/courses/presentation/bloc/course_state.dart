@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/course.dart';
 import '../../domain/entities/course_detail.dart';
+import '../../domain/entities/enrollment_detail.dart';
 
 /// Estados del BLoC de cursos
 abstract class CourseState extends Equatable {
@@ -90,4 +91,44 @@ class SectionCompletedSuccess extends CourseState {
 
   @override
   List<Object> get props => [sectionId];
+}
+
+/// Curso creado exitosamente
+class CourseCreatedSuccess extends CourseState {
+  final Course course;
+
+  const CourseCreatedSuccess(this.course);
+
+  @override
+  List<Object> get props => [course];
+}
+
+/// Curso actualizado exitosamente
+class CourseUpdatedSuccess extends CourseState {
+  final Course course;
+
+  const CourseUpdatedSuccess(this.course);
+
+  @override
+  List<Object> get props => [course];
+}
+
+/// Curso eliminado exitosamente
+class CourseDeletedSuccess extends CourseState {
+  final int courseId;
+
+  const CourseDeletedSuccess(this.courseId);
+
+  @override
+  List<Object> get props => [courseId];
+}
+
+/// Inscripciones del instructor cargadas
+class InstructorEnrollmentsLoaded extends CourseState {
+  final List<EnrollmentDetail> enrollments;
+
+  const InstructorEnrollmentsLoaded(this.enrollments);
+
+  @override
+  List<Object> get props => [enrollments];
 }

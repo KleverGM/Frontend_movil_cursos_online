@@ -4,6 +4,7 @@ import '../entities/course.dart';
 import '../entities/course_detail.dart';
 import '../entities/course_filters.dart';
 import '../entities/enrollment.dart';
+import '../entities/enrollment_detail.dart';
 
 /// Interfaz del repositorio de cursos
 abstract class CourseRepository {
@@ -24,4 +25,31 @@ abstract class CourseRepository {
 
   /// Marcar una sección como completada
   Future<Either<Failure, void>> markSectionCompleted(int sectionId);
+  
+  /// Crear un nuevo curso
+  Future<Either<Failure, Course>> createCourse({
+    required String titulo,
+    required String descripcion,
+    required String categoria,
+    required String nivel,
+    required double precio,
+    String? imagenPath,
+  });
+  
+  /// Actualizar un curso existente
+  Future<Either<Failure, Course>> updateCourse({
+    required int courseId,
+    required String titulo,
+    required String descripcion,
+    required String categoria,
+    required String nivel,
+    required double precio,
+    String? imagenPath,
+  });
+  
+  /// Eliminar un curso (desactivación lógica)
+  Future<Either<Failure, void>> deleteCourse(int courseId);
+
+  /// Obtener inscripciones de los cursos del instructor
+  Future<Either<Failure, List<EnrollmentDetail>>> getInstructorEnrollments({int? courseId});
 }

@@ -63,3 +63,84 @@ class MarkSectionCompletedEvent extends CourseEvent {
   @override
   List<Object> get props => [sectionId];
 }
+
+/// Crear un nuevo curso
+class CreateCourseEvent extends CourseEvent {
+  final String titulo;
+  final String descripcion;
+  final String categoria;
+  final String nivel;
+  final double precio;
+  final String? imagenPath;
+
+  const CreateCourseEvent({
+    required this.titulo,
+    required this.descripcion,
+    required this.categoria,
+    required this.nivel,
+    required this.precio,
+    this.imagenPath,
+  });
+
+  @override
+  List<Object?> get props => [
+        titulo,
+        descripcion,
+        categoria,
+        nivel,
+        precio,
+        imagenPath,
+      ];
+}
+
+/// Actualizar un curso existente
+class UpdateCourseEvent extends CourseEvent {
+  final int courseId;
+  final String titulo;
+  final String descripcion;
+  final String categoria;
+  final String nivel;
+  final double precio;
+  final String? imagenPath;
+
+  const UpdateCourseEvent({
+    required this.courseId,
+    required this.titulo,
+    required this.descripcion,
+    required this.categoria,
+    required this.nivel,
+    required this.precio,
+    this.imagenPath,
+  });
+
+  @override
+  List<Object?> get props => [
+        courseId,
+        titulo,
+        descripcion,
+        categoria,
+        nivel,
+        precio,
+        imagenPath,
+      ];
+}
+
+/// Eliminar un curso
+class DeleteCourseEvent extends CourseEvent {
+  final int courseId;
+
+  const DeleteCourseEvent(this.courseId);
+
+  @override
+  List<Object> get props => [courseId];
+}
+
+/// Obtener inscripciones del instructor
+class GetInstructorEnrollmentsEvent extends CourseEvent {
+  final int? courseId;
+
+  const GetInstructorEnrollmentsEvent({this.courseId});
+
+  @override
+  List<Object?> get props => [courseId];
+}
