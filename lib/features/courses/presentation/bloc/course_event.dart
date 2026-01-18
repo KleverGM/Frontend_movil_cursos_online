@@ -135,6 +135,26 @@ class DeleteCourseEvent extends CourseEvent {
   List<Object> get props => [courseId];
 }
 
+/// Activar un curso
+class ActivateCourseEvent extends CourseEvent {
+  final int courseId;
+
+  const ActivateCourseEvent(this.courseId);
+
+  @override
+  List<Object> get props => [courseId];
+}
+
+/// Desactivar un curso
+class DeactivateCourseEvent extends CourseEvent {
+  final int courseId;
+
+  const DeactivateCourseEvent(this.courseId);
+
+  @override
+  List<Object> get props => [courseId];
+}
+
 /// Obtener inscripciones del instructor
 class GetInstructorEnrollmentsEvent extends CourseEvent {
   final int? courseId;

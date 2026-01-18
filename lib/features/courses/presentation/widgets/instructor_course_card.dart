@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/entities/course.dart';
+import '../bloc/course_bloc.dart';
+import '../bloc/course_event.dart';
+import '../bloc/course_state.dart';
 import '../pages/course_enrollments_page.dart';
 import '../pages/course_stats_page.dart';
 import '../pages/course_form_page.dart';
@@ -23,36 +27,64 @@ class InstructorCourseCard extends StatelessWidget {
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
+        side: course.activo
+            ? BorderSide.none
+            : BorderSide(color: Colors.orange, width: 2),
       ),
-      child: Column(
+      child: Stack(
         children: [
-          InkWell(
-            onTap: () {
-              context.push('/courses/${course.id}');
-            },
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(12),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildCourseImage(theme),
-                  const SizedBox(height: 12),
-                  _buildTitle(theme),
-                  const SizedBox(height: 8),
-                  _buildDescription(theme),
-                  const SizedBox(height: 12),
-                  _buildInfoRow(theme),
-                  const SizedBox(height: 8),
-                  _buildStatsRow(theme),
-                ],
+          Column(
+            children: [
+              InkWell(
+                onTap: () {
+                  context.push('/courses/${course.id}');
+                },
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildCourseImage(theme),
+                      const SizedBox(height: 12),
+                      _buildTitle(theme),
+                      const SizedBox(height: 8),
+                      _buildDescription(theme),
+                      const SizedBox(height: 12),
+                      _buildInfoRow(theme),
+                      const SizedBox(height: 8),
+                      _buildStatsRow(theme),
+                    ],
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              _buildActionButtons(context, theme),
+            ],
+          ),
+          // Badge de estado inactivo
+          if (!course.activo)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.orange,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'INACTIVO',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
-          ),
-          const Divider(height: 1),
-          _buildActionButtons(context, theme),
         ],
       ),
     );
@@ -211,6 +243,57 @@ class InstructorCourseCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Row(
         children: [
+          // Botón toggle de activar/desactivar
+          BlocConsumer<CourseBloc, CourseState>(
+            listener: (context, state) {
+              if (state is CourseActivatedSuccess || state is CourseDeactivatedSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      state is CourseActivatedSuccess
+                          ? 'Curso activado exitosamente'
+                          : 'Curso desactivado exitosamente',
+                    ),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                // Recargar la lista de cursos
+                context.read<CourseBloc>().add(const GetMyCoursesEvent());
+              } else if (state is CourseError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              final isLoading = state is CourseLoading;
+              
+              return IconButton(
+                icon: Icon(
+                  course.activo ? Icons.visibility_off : Icons.visibility,
+                  size: 20,
+                ),
+                onPressed: isLoading
+                    ? null
+                    : () {
+                        if (course.activo) {
+                          context.read<CourseBloc>().add(
+                                DeactivateCourseEvent(course.id),
+                              );
+                        } else {
+                          context.read<CourseBloc>().add(
+                                ActivateCourseEvent(course.id),
+                              );
+                        }
+                      },
+                tooltip: course.activo ? 'Desactivar curso' : 'Activar curso',
+                color: course.activo ? Colors.orange : Colors.green,
+              );
+            },
+          ),
           Expanded(
             child: TextButton.icon(
               onPressed: () {
@@ -225,7 +308,7 @@ class InstructorCourseCard extends StatelessWidget {
               },
               icon: const Icon(Icons.people, size: 18),
               label: Text(
-                '${course.totalEstudiantes ?? 0} Estudiantes',
+                '${course.totalEstudiantes ?? 0}',
                 style: const TextStyle(fontSize: 13),
               ),
               style: TextButton.styleFrom(

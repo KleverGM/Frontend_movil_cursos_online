@@ -51,6 +51,12 @@ abstract class CourseRepository {
   /// Eliminar un curso (desactivación lógica)
   Future<Either<Failure, void>> deleteCourse(int courseId);
 
+  /// Activar un curso (hacerlo visible en el catálogo público)
+  Future<Either<Failure, Course>> activateCourse(int courseId);
+  
+  /// Desactivar un curso (ocultarlo del catálogo público)
+  Future<Either<Failure, Course>> deactivateCourse(int courseId);
+
   /// Obtener inscripciones de los cursos del instructor
   Future<Either<Failure, List<EnrollmentDetail>>> getInstructorEnrollments({int? courseId});
   

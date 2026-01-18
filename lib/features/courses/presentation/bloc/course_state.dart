@@ -123,6 +123,26 @@ class CourseDeletedSuccess extends CourseState {
   List<Object> get props => [courseId];
 }
 
+/// Curso activado exitosamente
+class CourseActivatedSuccess extends CourseState {
+  final Course course;
+
+  const CourseActivatedSuccess(this.course);
+
+  @override
+  List<Object> get props => [course];
+}
+
+/// Curso desactivado exitosamente
+class CourseDeactivatedSuccess extends CourseState {
+  final Course course;
+
+  const CourseDeactivatedSuccess(this.course);
+
+  @override
+  List<Object> get props => [course];
+}
+
 /// Inscripciones del instructor cargadas
 class InstructorEnrollmentsLoaded extends CourseState {
   final List<EnrollmentDetail> enrollments;

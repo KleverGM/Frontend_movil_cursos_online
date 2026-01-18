@@ -200,4 +200,32 @@ class CourseRepositoryImpl implements CourseRepository {
       return const Left(NetworkFailure(message: 'No hay conexión a internet'));
     }
   }
+
+  @override
+  Future<Either<Failure, Course>> activateCourse(int courseId) async {
+    if (await _networkInfo.isConnected) {
+      try {
+        final course = await _remoteDataSource.activateCourse(courseId);
+        return Right(course);
+      } catch (e) {
+        return Left(ServerFailure(message: e.toString()));
+      }
+    } else {
+      return const Left(NetworkFailure(message: 'No hay conexión a internet'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Course>> deactivateCourse(int courseId) async {
+    if (await _networkInfo.isConnected) {
+      try {
+        final course = await _remoteDataSource.deactivateCourse(courseId);
+        return Right(course);
+      } catch (e) {
+        return Left(ServerFailure(message: e.toString()));
+      }
+    } else {
+      return const Left(NetworkFailure(message: 'No hay conexión a internet'));
+    }
+  }
 }

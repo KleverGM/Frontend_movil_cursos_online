@@ -52,6 +52,12 @@ abstract class CourseRemoteDataSource {
   /// Eliminar un curso (desactivación lógica)
   Future<void> deleteCourse(int courseId);
   
+  /// Activar un curso
+  Future<CourseModel> activateCourse(int courseId);
+  
+  /// Desactivar un curso
+  Future<CourseModel> deactivateCourse(int courseId);
+  
   /// Obtener inscripciones de los cursos del instructor
   Future<List<EnrollmentDetailModel>> getInstructorEnrollments({int? courseId});
   
@@ -296,6 +302,34 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
 
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception('Error al eliminar curso: ${response.statusCode}');
+    }
+  }
+
+  @override
+  Future<CourseModel> activateCourse(int courseId) async {
+    final response = await _apiClient.post(
+      '${ApiConstants.courseDetail(courseId)}/activar/',
+      data: {},
+    );
+
+    if (response.statusCode == 200) {
+      return CourseModel.fromJson(response.data as Map<String, dynamic>);
+    } else {
+      throw Exception('Error al activar curso: ${response.statusCode}');
+    }
+  }
+
+  @override
+  Future<CourseModel> deactivateCourse(int courseId) async {
+    final response = await _apiClient.post(
+      '${ApiConstants.courseDetail(courseId)}/desactivar/',
+      data: {},
+    );
+
+    if (response.statusCode == 200) {
+      return CourseModel.fromJson(response.data as Map<String, dynamic>);
+    } else {
+      throw Exception('Error al desactivar curso: ${response.statusCode}');
     }
   }
 

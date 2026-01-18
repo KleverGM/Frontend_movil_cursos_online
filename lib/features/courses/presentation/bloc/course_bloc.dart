@@ -10,6 +10,7 @@ import '../../domain/usecases/get_instructor_enrollments_usecase.dart';
 import '../../domain/usecases/get_my_courses_usecase.dart';
 import '../../domain/usecases/mark_section_completed.dart';
 import '../../domain/usecases/update_course_usecase.dart';
+import '../../domain/usecases/toggle_course_status.dart';
 import 'course_event.dart';
 import 'course_state.dart';
 
@@ -25,6 +26,8 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
   final UpdateCourseUseCase _updateCourseUseCase;
   final DeleteCourseUseCase _deleteCourseUseCase;
   final GetInstructorEnrollmentsUseCase _getInstructorEnrollmentsUseCase;
+  final ActivateCourseUseCase _activateCourseUseCase;
+  final DeactivateCourseUseCase _deactivateCourseUseCase;
 
   CourseBloc(
     this._getCoursesUseCase,
@@ -37,6 +40,8 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     this._updateCourseUseCase,
     this._deleteCourseUseCase,
     this._getInstructorEnrollmentsUseCase,
+    this._activateCourseUseCase,
+    this._deactivateCourseUseCase,
   ) : super(const CourseInitial()) {
     on<GetCoursesEvent>(_onGetCourses);
     on<GetCourseDetailEvent>(_onGetCourseDetail);
@@ -49,6 +54,8 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     on<UpdateCourseEvent>(_onUpdateCourse);
     on<DeleteCourseEvent>(_onDeleteCourse);
     on<GetInstructorEnrollmentsEvent>(_onGetInstructorEnrollments);
+    on<ActivateCourseEvent>(_onActivateCourse);
+    on<DeactivateCourseEvent>(_onDeactivateCourse);
   }
 
   Future<void> _onGetCourses(
@@ -244,6 +251,34 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     result.fold(
       (failure) => emit(CourseError(failure.message)),
       (enrollments) => emit(InstructorEnrollmentsLoaded(enrollments)),
+    );
+  }
+
+  Future<void> _onActivateCourse(
+    ActivateCourseEvent event,
+    Emitter<CourseState> emit,
+  ) async {
+    emit(const CourseLoading());
+
+    final result = await _activateCourseUseCase(event.courseId);
+
+    result.fold(
+      (failure) => emit(CourseError(failure.message)),
+      (course) => emit(CourseActivatedSuccess(course)),
+    );
+  }
+
+  Future<void> _onDeactivateCourse(
+    DeactivateCourseEvent event,
+    Emitter<CourseState> emit,
+  ) async {
+    emit(const CourseLoading());
+
+    final result = await _deactivateCourseUseCase(event.courseId);
+
+    result.fold(
+      (failure) => emit(CourseError(failure.message)),
+      (course) => emit(CourseDeactivatedSuccess(course)),
     );
   }
 }
