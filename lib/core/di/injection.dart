@@ -24,6 +24,15 @@ import '../../features/courses/domain/usecases/get_enrolled_courses_usecase.dart
 import '../../features/courses/domain/usecases/get_my_courses_usecase.dart';
 import '../../features/courses/domain/usecases/mark_section_completed.dart';
 import '../../features/courses/presentation/bloc/course_bloc.dart';
+import '../../features/reviews/data/datasources/review_remote_datasource.dart';
+import '../../features/reviews/data/repositories/review_repository_impl.dart';
+import '../../features/reviews/domain/repositories/review_repository.dart';
+import '../../features/reviews/domain/usecases/create_review.dart';
+import '../../features/reviews/domain/usecases/delete_review.dart';
+import '../../features/reviews/domain/usecases/get_course_review_stats.dart';
+import '../../features/reviews/domain/usecases/get_course_reviews.dart';
+import '../../features/reviews/domain/usecases/mark_review_helpful.dart';
+import '../../features/reviews/presentation/bloc/review_bloc.dart';
 import '../network/api_client.dart';
 import '../network/dio_interceptor.dart';
 import '../network/network_info.dart';
@@ -156,6 +165,39 @@ Future<void> initializeDependencies() async {
       getIt<GetEnrolledCoursesUseCase>(),
       getIt<GetMyCoursesUseCase>(),
       getIt<MarkSectionCompleted>(),
+    ),
+  );
+
+  // ============== Features - Reviews ==============
+  
+  // DataSources
+  getIt.registerLazySingleton<ReviewRemoteDataSource>(
+    () => ReviewRemoteDataSourceImpl(getIt<ApiClient>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<ReviewRepository>(
+    () => ReviewRepositoryImpl(
+      getIt<ReviewRemoteDataSource>(),
+      getIt<NetworkInfo>(),
+    ),
+  );
+
+  // Use Cases
+  getIt.registerLazySingleton(() => GetCourseReviews(getIt<ReviewRepository>()));
+  getIt.registerLazySingleton(() => GetCourseReviewStats(getIt<ReviewRepository>()));
+  getIt.registerLazySingleton(() => CreateReview(getIt<ReviewRepository>()));
+  getIt.registerLazySingleton(() => MarkReviewHelpful(getIt<ReviewRepository>()));
+  getIt.registerLazySingleton(() => DeleteReview(getIt<ReviewRepository>()));
+
+  // BLoC
+  getIt.registerFactory(
+    () => ReviewBloc(
+      getIt<GetCourseReviews>(),
+      getIt<GetCourseReviewStats>(),
+      getIt<CreateReview>(),
+      getIt<MarkReviewHelpful>(),
+      getIt<DeleteReview>(),
     ),
   );
 }

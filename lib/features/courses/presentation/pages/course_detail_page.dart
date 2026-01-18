@@ -12,6 +12,11 @@ import '../widgets/course_progress_card.dart';
 import '../widgets/info_chip.dart';
 import '../widgets/instructor_card.dart';
 import '../widgets/module_card.dart';
+import '../../../reviews/presentation/bloc/review_bloc.dart';
+import '../../../reviews/presentation/bloc/review_event.dart';
+import '../../../reviews/presentation/bloc/review_state.dart';
+import '../../../reviews/presentation/widgets/rating_display.dart';
+import '../../../reviews/presentation/pages/course_reviews_page.dart';
 
 /// Página de detalle del curso
 class CourseDetailPage extends StatelessWidget {
@@ -262,6 +267,10 @@ class _CourseDetailContent extends StatelessWidget {
                   const SizedBox(height: 24),
                 ],
 
+                // Reseñas
+                _buildReviewsSection(context, courseDetail),
+                const SizedBox(height: 24),
+
                 // Módulos y Secciones
                 _buildModulesSection(context, courseDetail),
                 const SizedBox(height: 100), // Espacio para el botón flotante
@@ -351,6 +360,207 @@ class _CourseDetailContent extends StatelessWidget {
 
   Widget _buildProgressSection(CourseDetail courseDetail) {
     return CourseProgressCard(courseDetail: courseDetail);
+  }
+
+  Widget _buildReviewsSection(BuildContext context, CourseDetail courseDetail) {
+    return BlocProvider(
+      create: (context) => getIt<ReviewBloc>()
+        ..add(GetCourseReviewStatsEvent(courseDetail.course.id)),
+      child: BlocBuilder<ReviewBloc, ReviewState>(
+        builder: (context, state) {
+          if (state is ReviewLoading) {
+            return const Card(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            );
+          }
+
+          if (state is ReviewsLoaded && state.stats != null) {
+            final stats = state.stats!;
+            return Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Reseñas',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => CourseReviewsPage(
+                                  cursoId: courseDetail.course.id,
+                                  cursoTitulo: courseDetail.course.titulo,
+                                  canReview: courseDetail.inscrito,
+                                ),
+                              ),
+                            );
+                          },
+                          child: const Text('Ver todas'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Column(
+                          children: [
+                            Text(
+                              stats.calificacionPromedio.toStringAsFixed(1),
+                              style: const TextStyle(
+                                fontSize: 48,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            RatingDisplay(
+                              rating: stats.calificacionPromedio,
+                              size: 24,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              '${stats.totalResenas} reseñas',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 32),
+                        Expanded(
+                          child: Column(
+                            children: List.generate(5, (index) {
+                              final stars = 5 - index;
+                              final count = stats.distribucionEstrellas[stars] ?? 0;
+                              final percentage = stats.totalResenas > 0
+                                  ? (count / stats.totalResenas * 100)
+                                  : 0.0;
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      '$stars',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Icon(
+                                      Icons.star,
+                                      size: 16,
+                                      color: Colors.amber,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: LinearProgressIndicator(
+                                        value: percentage / 100,
+                                        backgroundColor: Colors.grey[300],
+                                        valueColor: const AlwaysStoppedAnimation<Color>(
+                                          Colors.amber,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    SizedBox(
+                                      width: 40,
+                                      child: Text(
+                                        '${percentage.toStringAsFixed(0)}%',
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 12,
+                                        ),
+                                        textAlign: TextAlign.end,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          // Si no hay estadísticas o hubo un error, mostrar sección básica
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Reseñas',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (courseDetail.inscrito)
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => CourseReviewsPage(
+                                  cursoId: courseDetail.course.id,
+                                  cursoTitulo: courseDetail.course.titulo,
+                                  canReview: true,
+                                ),
+                              ),
+                            );
+                          },
+                          child: const Text('Escribir reseña'),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.rate_review_outlined,
+                          size: 48,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Aún no hay reseñas',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildModulesSection(BuildContext context, CourseDetail courseDetail) {
