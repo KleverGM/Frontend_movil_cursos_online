@@ -19,6 +19,7 @@ abstract class ReviewRemoteDataSource {
   });
   Future<void> deleteReview(String reviewId);
   Future<void> markReviewHelpful(String reviewId);
+  Future<ReviewModel> replyToReview(String reviewId, String respuesta);
   Future<List<ReviewModel>> getMyReviews();
 }
 
@@ -132,8 +133,20 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
     }
   }
 
-  @override
-  Future<List<ReviewModel>> getMyReviews() async {
+  @override  Future<ReviewModel> replyToReview(String reviewId, String respuesta) async {
+    final response = await _apiClient.post(
+      '${ApiConstants.reviews}$reviewId/responder/',
+      data: {'texto': respuesta},
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return ReviewModel.fromJson(response.data as Map<String, dynamic>);
+    } else {
+      throw Exception('Error al responder reseña: ${response.statusCode}');
+    }
+  }
+
+  @override  Future<List<ReviewModel>> getMyReviews() async {
     final response = await _apiClient.get(ApiConstants.myReviews);
 
     if (response.statusCode == 200) {

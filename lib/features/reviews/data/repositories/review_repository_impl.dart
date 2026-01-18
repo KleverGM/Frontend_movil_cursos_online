@@ -114,6 +114,20 @@ class ReviewRepositoryImpl implements ReviewRepository {
   }
 
   @override
+  Future<Either<Failure, Review>> replyToReview(String reviewId, String respuesta) async {
+    if (await _networkInfo.isConnected) {
+      try {
+        final review = await _remoteDataSource.replyToReview(reviewId, respuesta);
+        return Right(review);
+      } catch (e) {
+        return Left(ServerFailure(message: e.toString()));
+      }
+    } else {
+      return const Left(NetworkFailure(message: 'No hay conexión a internet'));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<Review>>> getMyReviews() async {
     if (await _networkInfo.isConnected) {
       try {

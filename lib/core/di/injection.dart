@@ -32,6 +32,7 @@ import '../../features/reviews/domain/usecases/delete_review.dart';
 import '../../features/reviews/domain/usecases/get_course_review_stats.dart';
 import '../../features/reviews/domain/usecases/get_course_reviews.dart';
 import '../../features/reviews/domain/usecases/mark_review_helpful.dart';
+import '../../features/reviews/domain/usecases/reply_to_review.dart';
 import '../../features/reviews/presentation/bloc/review_bloc.dart';
 import '../network/api_client.dart';
 import '../network/dio_interceptor.dart';
@@ -189,6 +190,7 @@ Future<void> initializeDependencies() async {
   getIt.registerLazySingleton(() => CreateReview(getIt<ReviewRepository>()));
   getIt.registerLazySingleton(() => MarkReviewHelpful(getIt<ReviewRepository>()));
   getIt.registerLazySingleton(() => DeleteReview(getIt<ReviewRepository>()));
+  getIt.registerLazySingleton(() => ReplyToReview(getIt<ReviewRepository>()));
 
   // BLoC
   getIt.registerFactory(
@@ -198,6 +200,7 @@ Future<void> initializeDependencies() async {
       getIt<CreateReview>(),
       getIt<MarkReviewHelpful>(),
       getIt<DeleteReview>(),
+      getIt<ReplyToReview>(),
     ),
   );
 }

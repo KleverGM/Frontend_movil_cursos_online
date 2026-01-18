@@ -31,6 +31,9 @@ abstract class ReviewRepository {
   /// Marcar reseña como útil
   Future<Either<Failure, void>> markReviewHelpful(String reviewId);
 
+  /// Responder a una reseña (solo instructores)
+  Future<Either<Failure, Review>> replyToReview(String reviewId, String respuesta);
+
   /// Obtener mis reseñas
   Future<Either<Failure, List<Review>>> getMyReviews();
 }

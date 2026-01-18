@@ -8,7 +8,7 @@ import '../../features/courses/presentation/pages/course_content_page.dart';
 import '../../features/courses/presentation/pages/course_detail_page.dart';
 import '../../features/courses/presentation/pages/courses_page.dart';
 import '../../features/courses/presentation/pages/my_courses_page.dart';
-import '../../features/home/presentation/pages/main_layout.dart';
+import '../../features/home/presentation/pages/adaptive_main_layout.dart';
 
 /// Rutas de la aplicación
 class AppRoutes {
@@ -47,7 +47,7 @@ class AppRouter {
       // Home
       GoRoute(
         path: AppRoutes.home,
-        builder: (context, state) => const MainLayout(),
+        builder: (context, state) => const AdaptiveMainLayout(),
       ),
 
       // Courses Routes - CourseDetail y Content son páginas independientes

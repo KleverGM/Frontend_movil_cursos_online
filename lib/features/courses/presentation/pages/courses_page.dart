@@ -76,12 +76,18 @@ class _CoursesPageState extends State<CoursesPage> {
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Buscar cursos...',
                   border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.white70),
+                  hintStyle: TextStyle(
+                    color: theme.appBarTheme.foregroundColor?.withOpacity(0.7) ?? 
+                           Colors.black54,
+                  ),
                 ),
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(
+                  color: theme.appBarTheme.foregroundColor ?? Colors.black,
+                  fontSize: 16,
+                ),
                 onChanged: _applySearch,
               )
             : const Text('Explorar Cursos'),

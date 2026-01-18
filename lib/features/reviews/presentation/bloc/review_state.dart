@@ -51,6 +51,16 @@ class ReviewMarkedHelpful extends ReviewState {
   List<Object> get props => [reviewId];
 }
 
+/// Respuesta a reseña enviada
+class ReviewReplied extends ReviewState {
+  final Review review;
+
+  const ReviewReplied(this.review);
+
+  @override
+  List<Object> get props => [review];
+}
+
 /// Reseña eliminada
 class ReviewDeleted extends ReviewState {
   final String reviewId;

@@ -8,14 +8,18 @@ class ReviewCard extends StatelessWidget {
   final Review review;
   final VoidCallback? onMarkHelpful;
   final VoidCallback? onDelete;
+  final VoidCallback? onReply;
   final bool isMyReview;
+  final bool canReply;
 
   const ReviewCard({
     super.key,
     required this.review,
     this.onMarkHelpful,
     this.onDelete,
+    this.onReply,
     this.isMyReview = false,
+    this.canReply = false,
   });
 
   @override
@@ -121,10 +125,10 @@ class ReviewCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
             ],
-            // Botón de útil
-            if (!isMyReview && onMarkHelpful != null)
-              Row(
-                children: [
+            // Botón de útil y responder
+            Row(
+              children: [
+                if (!isMyReview && onMarkHelpful != null)
                   TextButton.icon(
                     onPressed: review.marcadoUtilPorMi ? null : onMarkHelpful,
                     icon: Icon(
@@ -138,8 +142,22 @@ class ReviewCard extends StatelessWidget {
                       style: const TextStyle(fontSize: 13),
                     ),
                   ),
+                if (canReply && onReply != null && review.respuestaInstructor == null) ...[
+                  const Spacer(),
+                  TextButton.icon(
+                    onPressed: onReply,
+                    icon: const Icon(Icons.reply, size: 16),
+                    label: const Text(
+                      'Responder',
+                      style: TextStyle(fontSize: 13),
+                    ),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Theme.of(context).primaryColor,
+                    ),
+                  ),
                 ],
-              ),
+              ],
+            ),
           ],
         ),
       ),

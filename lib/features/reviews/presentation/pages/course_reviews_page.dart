@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../domain/entities/review.dart';
 import '../bloc/review_bloc.dart';
 import '../bloc/review_event.dart';
 import '../bloc/review_state.dart';
 import '../widgets/rating_display.dart';
 import '../widgets/review_card.dart';
+import '../widgets/reply_review_dialog.dart';
 import 'create_review_dialog.dart';
 
 /// Página para mostrar las reseñas de un curso
@@ -38,6 +41,17 @@ class CourseReviewsPage extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('¡Reseña publicada exitosamente!'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              // Recargar reseñas
+              context.read<ReviewBloc>()
+                ..add(GetCourseReviewsEvent(cursoId))
+                ..add(GetCourseReviewStatsEvent(cursoId));
+            } else if (state is ReviewReplied) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('¡Respuesta enviada exitosamente!'),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -91,16 +105,27 @@ class CourseReviewsPage extends StatelessWidget {
         Expanded(
           child: reviews.isEmpty
               ? _buildEmptyState()
-              : ListView.builder(
-                  itemCount: reviews.length,
-                  itemBuilder: (context, index) {
-                    final review = reviews[index];
-                    return ReviewCard(
-                      review: review,
-                      onMarkHelpful: () {
-                        context.read<ReviewBloc>().add(
-                              MarkReviewHelpfulEvent(review.id),
-                            );
+              : BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, authState) {
+                    final isInstructor = authState is AuthAuthenticated && 
+                                        (authState.user.isInstructor || authState.user.isAdmin);
+                    
+                    return ListView.builder(
+                      itemCount: reviews.length,
+                      itemBuilder: (context, index) {
+                        final review = reviews[index];
+                        return ReviewCard(
+                          review: review,
+                          canReply: isInstructor,
+                          onMarkHelpful: () {
+                            context.read<ReviewBloc>().add(
+                                  MarkReviewHelpfulEvent(review.id),
+                                );
+                          },
+                          onReply: isInstructor
+                              ? () => _showReplyDialog(context, review.id)
+                              : null,
+                        );
                       },
                     );
                   },
@@ -188,6 +213,23 @@ class CourseReviewsPage extends StatelessWidget {
         cursoId: cursoId,
         cursoTitulo: cursoTitulo,
         reviewBloc: reviewBloc,
+      ),
+    );
+  }
+
+  void _showReplyDialog(BuildContext context, String reviewId) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => ReplyReviewDialog(
+        reviewId: reviewId,
+        onReply: (respuesta) {
+          context.read<ReviewBloc>().add(
+                ReplyToReviewEvent(
+                  reviewId: reviewId,
+                  respuesta: respuesta,
+                ),
+              );
+        },
       ),
     );
   }

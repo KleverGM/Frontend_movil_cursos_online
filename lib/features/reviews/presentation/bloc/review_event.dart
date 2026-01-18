@@ -54,6 +54,20 @@ class MarkReviewHelpfulEvent extends ReviewEvent {
   List<Object> get props => [reviewId];
 }
 
+/// Responder a una reseña
+class ReplyToReviewEvent extends ReviewEvent {
+  final String reviewId;
+  final String respuesta;
+
+  const ReplyToReviewEvent({
+    required this.reviewId,
+    required this.respuesta,
+  });
+
+  @override
+  List<Object> get props => [reviewId, respuesta];
+}
+
 /// Eliminar reseña
 class DeleteReviewEvent extends ReviewEvent {
   final String reviewId;

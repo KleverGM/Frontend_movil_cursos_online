@@ -4,6 +4,7 @@ import '../../domain/usecases/delete_review.dart';
 import '../../domain/usecases/get_course_review_stats.dart';
 import '../../domain/usecases/get_course_reviews.dart';
 import '../../domain/usecases/mark_review_helpful.dart';
+import '../../domain/usecases/reply_to_review.dart';
 import 'review_event.dart';
 import 'review_state.dart';
 
@@ -14,6 +15,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
   final CreateReview _createReview;
   final MarkReviewHelpful _markReviewHelpful;
   final DeleteReview _deleteReview;
+  final ReplyToReview _replyToReview;
 
   ReviewBloc(
     this._getCourseReviews,
@@ -21,12 +23,14 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     this._createReview,
     this._markReviewHelpful,
     this._deleteReview,
+    this._replyToReview,
   ) : super(const ReviewInitial()) {
     on<GetCourseReviewsEvent>(_onGetCourseReviews);
     on<GetCourseReviewStatsEvent>(_onGetCourseReviewStats);
     on<CreateReviewEvent>(_onCreateReview);
     on<MarkReviewHelpfulEvent>(_onMarkReviewHelpful);
     on<DeleteReviewEvent>(_onDeleteReview);
+    on<ReplyToReviewEvent>(_onReplyToReview);
   }
 
   Future<void> _onGetCourseReviews(
@@ -93,6 +97,25 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     result.fold(
       (failure) => emit(ReviewError(failure.message)),
       (_) => emit(ReviewMarkedHelpful(event.reviewId)),
+    );
+  }
+
+  Future<void> _onReplyToReview(
+    ReplyToReviewEvent event,
+    Emitter<ReviewState> emit,
+  ) async {
+    emit(const ReviewLoading());
+
+    final result = await _replyToReview(
+      ReplyToReviewParams(
+        reviewId: event.reviewId,
+        respuesta: event.respuesta,
+      ),
+    );
+
+    result.fold(
+      (failure) => emit(ReviewError(failure.message)),
+      (review) => emit(ReviewReplied(review)),
     );
   }
 
