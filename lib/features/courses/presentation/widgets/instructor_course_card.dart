@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/entities/course.dart';
 import '../pages/course_enrollments_page.dart';
+import '../pages/course_stats_page.dart';
+import '../pages/course_form_page.dart';
 
 /// Tarjeta de curso para instructores con acciones adicionales
 class InstructorCourseCard extends StatelessWidget {
@@ -234,9 +236,11 @@ class InstructorCourseCard extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.edit, size: 20),
             onPressed: () {
-              // TODO: Navegar a editar curso
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Editar curso - Próximamente')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CourseFormPage(course: course),
+                ),
               );
             },
             tooltip: 'Editar curso',
@@ -245,9 +249,11 @@ class InstructorCourseCard extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.bar_chart, size: 20),
             onPressed: () {
-              // TODO: Ver estadísticas del curso
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Estadísticas - Próximamente')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CourseStatsPage(course: course),
+                ),
               );
             },
             tooltip: 'Ver estadísticas',

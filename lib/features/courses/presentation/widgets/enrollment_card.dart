@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../domain/entities/enrollment_detail.dart';
+import '../../domain/entities/enrollment_detail.dart';
 
 /// Widget reutilizable para mostrar una inscripción
 class EnrollmentCard extends StatelessWidget {

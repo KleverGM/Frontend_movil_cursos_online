@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/enrollment_detail.dart';
+import '../../domain/entities/enrollment_detail.dart';
 
 /// Widget reutilizable para mostrar estadísticas de progreso de estudiantes
 class StudentStatsCard extends StatelessWidget {

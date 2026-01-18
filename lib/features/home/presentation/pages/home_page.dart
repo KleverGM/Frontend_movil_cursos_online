@@ -11,6 +11,8 @@ import '../widgets/continue_learning_card.dart';
 import '../widgets/dashboard_header.dart';
 import '../widgets/explore_course_card.dart';
 import '../widgets/stat_card.dart';
+import '../widgets/progress_pie_chart.dart';
+import '../widgets/learning_streak_widget.dart';
 
 /// Página principal (Dashboard) para estudiantes
 class HomePage extends StatefulWidget {
@@ -72,6 +74,7 @@ class _HomePageState extends State<HomePage> {
               slivers: [
                 const SliverToBoxAdapter(child: DashboardHeader()),
                 SliverToBoxAdapter(child: _buildStats()),
+                SliverToBoxAdapter(child: _buildCharts()),
                 SliverToBoxAdapter(child: _buildContinueLearning()),
                 SliverToBoxAdapter(child: _buildExploreCourses()),
                 const SliverToBoxAdapter(child: SizedBox(height: 100)),
@@ -116,6 +119,37 @@ class _HomePageState extends State<HomePage> {
               color: Colors.green,
               onTap: () => context.push(AppRoutes.myCourses),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCharts() {
+    if (isLoadingEnrolled) {
+      return const SizedBox.shrink();
+    }
+
+    // Calcular cursos completados, en progreso y sin iniciar
+    // Por ahora usaremos valores simulados, puedes obtenerlos del backend
+    final completedCourses = 0;
+    final inProgressCourses = enrolledCourses.length;
+    final notStartedCourses = 0;
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          ProgressPieChart(
+            completedCourses: completedCourses,
+            inProgressCourses: inProgressCourses,
+            notStartedCourses: notStartedCourses,
+          ),
+          const SizedBox(height: 16),
+          LearningStreakWidget(
+            currentStreak: 3,
+            longestStreak: 7,
+            last7DaysActivity: [1, 1, 1, 0, 0, 0, 0],
           ),
         ],
       ),

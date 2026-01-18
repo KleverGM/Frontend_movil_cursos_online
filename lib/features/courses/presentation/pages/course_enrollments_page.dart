@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../domain/entities/enrollment_detail.dart';
-import '../../bloc/course_bloc.dart';
-import '../../bloc/course_event.dart';
-import '../../bloc/course_state.dart';
+import '../../domain/entities/enrollment_detail.dart';
+import '../bloc/course_bloc.dart';
+import '../bloc/course_event.dart';
+import '../bloc/course_state.dart';
 import '../widgets/enrollment_card.dart';
 import '../widgets/student_stats_card.dart';
 

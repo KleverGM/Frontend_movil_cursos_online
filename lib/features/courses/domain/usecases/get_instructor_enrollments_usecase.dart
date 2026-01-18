@@ -12,8 +12,13 @@ class GetInstructorEnrollmentsUseCase implements UseCase<List<EnrollmentDetail>,
   GetInstructorEnrollmentsUseCase(this.repository);
 
   @override
-  Future<Either<Failure, List<EnrollmentDetail>>> call(GetInstructorEnrollmentsParams params) async {
+  Future<Either<Failure, List<EnrollmentDetail>>> execute(GetInstructorEnrollmentsParams params) async {
     return await repository.getInstructorEnrollments(courseId: params.courseId);
+  }
+  
+  // Alias para compatibilidad con BLoC
+  Future<Either<Failure, List<EnrollmentDetail>>> call(GetInstructorEnrollmentsParams params) async {
+    return execute(params);
   }
 }
 

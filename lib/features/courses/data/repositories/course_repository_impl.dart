@@ -6,6 +6,7 @@ import '../../domain/entities/course_detail.dart';
 import '../../domain/entities/course_filters.dart';
 import '../../domain/entities/enrollment.dart';
 import '../../domain/entities/enrollment_detail.dart';
+import '../../domain/entities/course_stats.dart';
 import '../../domain/repositories/course_repository.dart';
 import '../datasources/course_remote_datasource.dart';
 
@@ -178,6 +179,20 @@ class CourseRepositoryImpl implements CourseRepository {
       try {
         final enrollments = await _remoteDataSource.getInstructorEnrollments(courseId: courseId);
         return Right(enrollments);
+      } catch (e) {
+        return Left(ServerFailure(message: e.toString()));
+      }
+    } else {
+      return const Left(NetworkFailure(message: 'No hay conexión a internet'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, CourseStats>> getCourseStats(int courseId) async {
+    if (await _networkInfo.isConnected) {
+      try {
+        final stats = await _remoteDataSource.getCourseStats(courseId);
+        return Right(stats);
       } catch (e) {
         return Left(ServerFailure(message: e.toString()));
       }

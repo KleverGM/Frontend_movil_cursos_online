@@ -27,6 +27,7 @@ import '../../features/courses/domain/usecases/get_instructor_enrollments_usecas
 import '../../features/courses/domain/usecases/get_my_courses_usecase.dart';
 import '../../features/courses/domain/usecases/mark_section_completed.dart';
 import '../../features/courses/domain/usecases/update_course_usecase.dart';
+import '../../features/courses/domain/usecases/get_course_stats_usecase.dart';
 import '../../features/courses/presentation/bloc/course_bloc.dart';
 import '../../features/reviews/data/datasources/review_remote_datasource.dart';
 import '../../features/reviews/data/repositories/review_repository_impl.dart';
@@ -164,6 +165,7 @@ Future<void> initializeDependencies() async {
   getIt.registerLazySingleton(() => UpdateCourseUseCase(getIt<CourseRepository>()));
   getIt.registerLazySingleton(() => DeleteCourseUseCase(getIt<CourseRepository>()));
   getIt.registerLazySingleton(() => GetInstructorEnrollmentsUseCase(getIt<CourseRepository>()));
+  getIt.registerLazySingleton(() => GetCourseStatsUseCase(getIt<CourseRepository>()));
 
   // BLoC
   getIt.registerFactory(

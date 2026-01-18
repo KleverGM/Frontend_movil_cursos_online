@@ -6,6 +6,7 @@ import '../models/course_detail_model.dart';
 import '../models/course_model.dart';
 import '../models/enrollment_model.dart';
 import '../models/enrollment_detail_model.dart';
+import '../models/course_stats_model.dart';
 
 /// DataSource remoto para cursos
 abstract class CourseRemoteDataSource {
@@ -53,6 +54,9 @@ abstract class CourseRemoteDataSource {
   
   /// Obtener inscripciones de los cursos del instructor
   Future<List<EnrollmentDetailModel>> getInstructorEnrollments({int? courseId});
+  
+  /// Obtener estadísticas detalladas de un curso
+  Future<CourseStatsModel> getCourseStats(int courseId);
 }
 
 class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
@@ -291,6 +295,9 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
     );
 
     if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Error al eliminar curso: ${response.statusCode}');
+    }
+  }
 
   @override
   Future<List<EnrollmentDetailModel>> getInstructorEnrollments({int? courseId}) async {
@@ -317,7 +324,17 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
       throw Exception('Error al obtener inscripciones: ${response.statusCode}');
     }
   }
-      throw Exception('Error al eliminar curso: ${response.statusCode}');
+
+  @override
+  Future<CourseStatsModel> getCourseStats(int courseId) async {
+    final response = await _apiClient.get(
+      '${ApiConstants.courseDetail(courseId)}/estadisticas/',
+    );
+
+    if (response.statusCode == 200) {
+      return CourseStatsModel.fromJson(response.data as Map<String, dynamic>);
+    } else {
+      throw Exception('Error al obtener estadísticas del curso: ${response.statusCode}');
     }
   }
 }

@@ -6,6 +6,10 @@ import '../../../../core/di/injection.dart';
 import '../../domain/entities/course.dart';
 import '../../domain/entities/course_input.dart';
 import '../bloc/course_bloc.dart';
+import '../bloc/course_event.dart';
+import '../bloc/course_state.dart';
+import '../widgets/course_image_picker.dart';
+import '../widgets/confirm_delete_dialog.dart';
 
 /// Página para crear o editar cursos (para instructores)
 class CourseFormPage extends StatefulWidget {
@@ -166,8 +170,12 @@ class _CourseFormPageState extends State<CourseFormPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Imagen
-                _buildImageSection(),
+                // Imagen del curso
+                CourseImagePicker(
+                  selectedImageFile: _selectedImageFile,
+                  existingImageUrl: widget.course?.imagen,
+                  onTap: _pickImage,
+                ),
                 const SizedBox(height: 24),
 
                 // Título
@@ -318,108 +326,16 @@ class _CourseFormPageState extends State<CourseFormPage> {
     );
   }
 
-  Widget _buildImageSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Imagen del Curso',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: _pickImage,
-          child: Container(
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey),
-            ),
-            child: _buildImageWidget(),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Toca para seleccionar una imagen',
-          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildImageWidget() {
-    if (_selectedImageFile != null) {
-      // Mostrar imagen seleccionada
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.file(
-          _selectedImageFile!,
-          fit: BoxFit.cover,
-        ),
-      );
-    } else if (_courseInput.imagenUrl != null) {
-      // Mostrar imagen existente (al editar)
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.network(
-          _courseInput.imagenUrl!,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _buildPlaceholder();
-          },
-        ),
-      );
-    } else {
-      // Placeholder
-      return _buildPlaceholder();
-    }
-  }
-
-  Widget _buildPlaceholder() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.image, size: 64, color: Colors.grey[400]),
-          const SizedBox(height: 8),
-          Text(
-            'Sin imagen',
-            style: TextStyle(color: Colors.grey[600]),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showDeleteConfirmation() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmar Eliminación'),
-        content: const Text(
-          '¿Estás seguro de que deseas eliminar este curso? Esta acción no se puede deshacer.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.read<CourseBloc>().add(
-                    DeleteCourseEvent(_courseInput.id!),
-                  );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
+    ConfirmDeleteDialog.show(
+      context,
+      title: 'Confirmar Eliminación',
+      content: '¿Estás seguro de que deseas eliminar este curso? Esta acción no se puede deshacer.',
+      onConfirm: () {
+        context.read<CourseBloc>().add(
+          DeleteCourseEvent(_courseInput.id!),
+        );
+      },
     );
   }
 }

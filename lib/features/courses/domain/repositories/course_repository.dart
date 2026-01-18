@@ -5,6 +5,7 @@ import '../entities/course_detail.dart';
 import '../entities/course_filters.dart';
 import '../entities/enrollment.dart';
 import '../entities/enrollment_detail.dart';
+import '../entities/course_stats.dart';
 
 /// Interfaz del repositorio de cursos
 abstract class CourseRepository {
@@ -52,4 +53,7 @@ abstract class CourseRepository {
 
   /// Obtener inscripciones de los cursos del instructor
   Future<Either<Failure, List<EnrollmentDetail>>> getInstructorEnrollments({int? courseId});
+  
+  /// Obtener estadísticas detalladas de un curso
+  Future<Either<Failure, CourseStats>> getCourseStats(int courseId);
 }

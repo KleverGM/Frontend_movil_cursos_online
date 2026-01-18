@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../courses/presentation/pages/courses_page.dart';
 import '../../../courses/presentation/pages/instructor_dashboard_page.dart';
-import 'home_page.dart';
 import 'profile_page.dart';
 
 /// InheritedWidget para compartir la función de cambio de pestaña
@@ -41,8 +39,6 @@ class InstructorMainLayoutState extends State<InstructorMainLayout> {
     super.initState();
     _pages = [
       const InstructorDashboardPage(),
-      const CoursesPage(),
-      const HomePage(), // Estadísticas del instructor
       const ProfilePage(),
     ];
   }
@@ -71,19 +67,9 @@ class InstructorMainLayoutState extends State<InstructorMainLayout> {
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_outlined),
-            activeIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.explore_outlined),
-            activeIcon: Icon(Icons.explore),
-            label: 'Explorar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.analytics_outlined),
-            activeIcon: Icon(Icons.analytics),
-            label: 'Actividad',
+            icon: Icon(Icons.school_outlined),
+            activeIcon: Icon(Icons.school),
+            label: 'Mis Cursos',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),

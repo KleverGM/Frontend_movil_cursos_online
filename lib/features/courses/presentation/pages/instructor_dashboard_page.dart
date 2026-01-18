@@ -7,7 +7,11 @@ import '../bloc/course_bloc.dart';
 import '../bloc/course_event.dart';
 import '../bloc/course_state.dart';
 import '../widgets/instructor_course_card.dart';
+import '../widgets/stats_card.dart';
+import '../widgets/students_bar_chart.dart';
+import '../widgets/ratings_distribution_chart.dart';
 import 'course_enrollments_page.dart';
+import 'course_form_page.dart';
 
 /// Dashboard para instructores
 class InstructorDashboardPage extends StatefulWidget {
@@ -75,13 +79,17 @@ class _InstructorDashboardPageState extends State<InstructorDashboardPage> {
         child: _buildBody(),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // TODO: Navegar a crear curso
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Crear curso - Próximamente'),
+        onPressed: () async {
+          final result = await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const CourseFormPage(),
             ),
           );
+          
+          // Si se creó un curso exitosamente, recargar la lista
+          if (result == true) {
+            _loadMyCourses();
+          }
         },
         icon: const Icon(Icons.add),
         label: const Text('Crear Curso'),
@@ -136,6 +144,18 @@ class _InstructorDashboardPageState extends State<InstructorDashboardPage> {
             // Estadísticas
             _buildStatsSection(context, stats),
             const SizedBox(height: 24),
+
+            // Gráficos
+            if (courses.isNotEmpty) ...[
+              StudentsBarChart(
+                courseStudents: _getCourseStudentsMap(courses),
+              ),
+              const SizedBox(height: 16),
+              RatingsDistributionChart(
+                ratingsCount: stats['ratingsDistribution'] ?? {},
+              ),
+              const SizedBox(height: 24),
+            ],
 
             // Mis cursos
             Row(
@@ -315,6 +335,17 @@ class _InstructorDashboardPageState extends State<InstructorDashboardPage> {
     );
   }
 
+  Map<String, int> _getCourseStudentsMap(List<Course> courses) {
+    final map = <String, int>{};
+    for (final course in courses.take(5)) {
+      final shortTitle = course.titulo.length > 15
+          ? '${course.titulo.substring(0, 15)}...'
+          : course.titulo;
+      map[shortTitle] = course.totalEstudiantes ?? 0;
+    }
+    return map;
+  }
+
   Map<String, dynamic> _calculateStats(List<Course> courses) {
     int totalEstudiantes = 0;
     double sumaCalificaciones = 0;
@@ -329,6 +360,15 @@ class _InstructorDashboardPageState extends State<InstructorDashboardPage> {
       // Por ahora dejamos esto pendiente hasta tener el endpoint
     }
 
+    // Simular distribución de ratings (puedes obtener datos reales del backend)
+    final ratingsDistribution = <int, int>{
+      5: (totalEstudiantes * 0.4).toInt(),
+      4: (totalEstudiantes * 0.3).toInt(),
+      3: (totalEstudiantes * 0.2).toInt(),
+      2: (totalEstudiantes * 0.07).toInt(),
+      1: (totalEstudiantes * 0.03).toInt(),
+    };
+
     return {
       'totalCursos': courses.length,
       'totalEstudiantes': totalEstudiantes,
@@ -336,6 +376,7 @@ class _InstructorDashboardPageState extends State<InstructorDashboardPage> {
           ? sumaCalificaciones / cursosConCalificacion 
           : 0.0,
       'ingresos': ingresos,
+      'ratingsDistribution': ratingsDistribution,
     };
   }
 }
