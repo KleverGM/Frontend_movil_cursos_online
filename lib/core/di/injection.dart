@@ -16,10 +16,13 @@ import '../../features/auth/domain/usecases/register_usecase.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/courses/data/datasources/course_remote_datasource.dart';
 import '../../features/courses/data/datasources/module_remote_datasource.dart';
+import '../../features/courses/data/datasources/section_remote_datasource.dart';
 import '../../features/courses/data/repositories/course_repository_impl.dart';
 import '../../features/courses/data/repositories/module_repository_impl.dart';
+import '../../features/courses/data/repositories/section_repository_impl.dart';
 import '../../features/courses/domain/repositories/course_repository.dart';
 import '../../features/courses/domain/repositories/module_repository.dart';
+import '../../features/courses/domain/repositories/section_repository.dart';
 import '../../features/courses/domain/usecases/create_course_usecase.dart';
 import '../../features/courses/domain/usecases/delete_course_usecase.dart';
 import '../../features/courses/domain/usecases/enroll_in_course_usecase.dart';
@@ -36,9 +39,14 @@ import '../../features/courses/domain/usecases/get_modules_by_course.dart';
 import '../../features/courses/domain/usecases/create_module.dart';
 import '../../features/courses/domain/usecases/update_module.dart';
 import '../../features/courses/domain/usecases/delete_module.dart';
+import '../../features/courses/domain/usecases/get_sections_by_module.dart';
+import '../../features/courses/domain/usecases/create_section.dart';
+import '../../features/courses/domain/usecases/update_section.dart';
+import '../../features/courses/domain/usecases/delete_section.dart';
 import '../../features/courses/presentation/bloc/course_bloc.dart';
 import '../../features/courses/presentation/bloc/module_bloc.dart';
 import '../../features/courses/presentation/bloc/module_event.dart';
+import '../../features/courses/presentation/bloc/section_bloc.dart';
 import '../../features/reviews/data/datasources/review_remote_datasource.dart';
 import '../../features/reviews/data/repositories/review_repository_impl.dart';
 import '../../features/reviews/domain/repositories/review_repository.dart';
@@ -233,6 +241,37 @@ Future<void> initializeDependencies() async {
       getIt<CreateModuleUseCase>(),
       getIt<UpdateModuleUseCase>(),
       getIt<DeleteModuleUseCase>(),
+    ),
+  );
+
+  // ============== Features - Sections ==============
+  
+  // DataSources
+  getIt.registerLazySingleton<SectionRemoteDataSource>(
+    () => SectionRemoteDataSourceImpl(getIt<ApiClient>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<SectionRepository>(
+    () => SectionRepositoryImpl(
+      getIt<SectionRemoteDataSource>(),
+      getIt<NetworkInfo>(),
+    ),
+  );
+
+  // Use Cases
+  getIt.registerLazySingleton(() => GetSectionsByModuleUseCase(getIt<SectionRepository>()));
+  getIt.registerLazySingleton(() => CreateSectionUseCase(getIt<SectionRepository>()));
+  getIt.registerLazySingleton(() => UpdateSectionUseCase(getIt<SectionRepository>()));
+  getIt.registerLazySingleton(() => DeleteSectionUseCase(getIt<SectionRepository>()));
+
+  // BLoC
+  getIt.registerFactory(
+    () => SectionBloc(
+      getIt<GetSectionsByModuleUseCase>(),
+      getIt<CreateSectionUseCase>(),
+      getIt<UpdateSectionUseCase>(),
+      getIt<DeleteSectionUseCase>(),
     ),
   );
 

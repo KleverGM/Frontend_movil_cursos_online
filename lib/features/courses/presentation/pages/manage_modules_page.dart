@@ -9,6 +9,7 @@ import '../bloc/module_state.dart';
 import '../widgets/instructor_module_card.dart';
 import '../widgets/empty_modules_widget.dart';
 import '../widgets/module_form_dialog.dart';
+import 'manage_sections_page.dart';
 
 /// Página para gestionar los módulos de un curso
 class ManageModulesPage extends StatelessWidget {
@@ -93,10 +94,10 @@ class ManageModulesPage extends StatelessWidget {
                     return InstructorModuleCard(
                       module: module,
                       onTap: () {
-                        // TODO: Navegar a gestión de secciones
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Gestión de secciones próximamente...'),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ManageSectionsPage(module: module),
                           ),
                         );
                       },
