@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/router/app_router.dart';
 import '../../domain/entities/course_detail.dart';
-import '../../domain/entities/module.dart';
 import '../bloc/course_bloc.dart';
 import '../bloc/course_event.dart';
 import '../bloc/course_state.dart';
+import '../widgets/course_progress_card.dart';
+import '../widgets/info_chip.dart';
+import '../widgets/instructor_card.dart';
+import '../widgets/module_card.dart';
 
 /// Página de detalle del curso
 class CourseDetailPage extends StatelessWidget {
@@ -22,17 +27,31 @@ class CourseDetailPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => getIt<CourseBloc>()
         ..add(GetCourseDetailEvent(courseId)),
-      child: Scaffold(
-        body: BlocBuilder<CourseBloc, CourseState>(
-          builder: (context, state) {
-            if (state is CourseLoading) {
-              return const Center(
+      child: BlocConsumer<CourseBloc, CourseState>(
+        listener: (context, state) {
+          if (state is EnrollmentSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.green,
+              ),
+            );
+            // Recargar detalle del curso después de inscribirse
+            context.read<CourseBloc>().add(GetCourseDetailEvent(courseId));
+          }
+        },
+        builder: (context, state) {
+          if (state is CourseLoading) {
+            return const Scaffold(
+              body: Center(
                 child: CircularProgressIndicator(),
-              );
-            }
+              ),
+            );
+          }
 
-            if (state is CourseError) {
-              return Center(
+          if (state is CourseError) {
+            return Scaffold(
+              body: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -54,16 +73,96 @@ class CourseDetailPage extends StatelessWidget {
                     ),
                   ],
                 ),
-              );
-            }
+              ),
+            );
+          }
 
-            if (state is CourseDetailLoaded) {
-              return _CourseDetailContent(courseDetail: state.courseDetail);
-            }
+          if (state is CourseDetailLoaded) {
+            return Scaffold(
+              body: _CourseDetailContent(courseDetail: state.courseDetail),
+              floatingActionButton: _buildFloatingButton(
+                context,
+                state.courseDetail,
+              ),
+            );
+          }
 
-            return const SizedBox.shrink();
-          },
+          return const Scaffold(
+            body: SizedBox.shrink(),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildFloatingButton(BuildContext context, CourseDetail courseDetail) {
+    if (courseDetail.inscrito) {
+      // Usuario ya inscrito - Botón para continuar
+      return FloatingActionButton.extended(
+        onPressed: () {
+          context.push(
+            AppRoutes.courseContent(courseDetail.course.id),
+            extra: courseDetail,
+          );
+        },
+        icon: const Icon(Icons.play_arrow),
+        label: const Text('Continuar'),
+        backgroundColor: Colors.green,
+      );
+    } else {
+      // Usuario no inscrito - Botón para inscribirse
+      return FloatingActionButton.extended(
+        onPressed: () => _showEnrollDialog(context, courseDetail),
+        icon: const Icon(Icons.add_circle),
+        label: Text('Inscribirse \$${courseDetail.course.precio.toStringAsFixed(2)}'),
+        backgroundColor: Theme.of(context).primaryColor,
+      );
+    }
+  }
+
+  void _showEnrollDialog(BuildContext context, CourseDetail courseDetail) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Confirmar Inscripción'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('¿Deseas inscribirte en el curso "${courseDetail.course.titulo}"?'),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const Icon(Icons.attach_money, color: Colors.green),
+                Text(
+                  'Precio: \$${courseDetail.course.precio.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${courseDetail.course.totalModulos ?? 0} módulos • ${courseDetail.course.totalSecciones ?? 0} secciones',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+          ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              context.read<CourseBloc>().add(EnrollInCourseEvent(courseId));
+            },
+            child: const Text('Confirmar'),
+          ),
+        ],
       ),
     );
   }
@@ -80,6 +179,7 @@ class _CourseDetailContent extends StatelessWidget {
     final course = courseDetail.course;
 
     return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
       slivers: [
         // App Bar con imagen
         SliverAppBar(
@@ -164,7 +264,7 @@ class _CourseDetailContent extends StatelessWidget {
 
                 // Módulos y Secciones
                 _buildModulesSection(context, courseDetail),
-                const SizedBox(height: 80), // Espacio para el botón flotante
+                const SizedBox(height: 100), // Espacio para el botón flotante
               ],
             ),
           ),
@@ -182,17 +282,17 @@ class _CourseDetailContent extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildInfoChip(
+                InfoChip(
                   icon: Icons.star,
                   label: course.nivel,
                   color: Colors.orange,
                 ),
-                _buildInfoChip(
+                InfoChip(
                   icon: Icons.category,
                   label: course.categoria,
                   color: Colors.blue,
                 ),
-                _buildInfoChip(
+                InfoChip(
                   icon: Icons.people,
                   label: '${course.totalEstudiantes ?? 0}',
                   color: Colors.green,
@@ -219,26 +319,6 @@ class _CourseDetailContent extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoChip({
-    required IconData icon,
-    required String label,
-    required Color color,
-  }) {
-    return Column(
-      children: [
-        Icon(icon, color: color, size: 28),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildDescriptionSection(course) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,67 +341,16 @@ class _CourseDetailContent extends StatelessWidget {
 
   Widget _buildInstructorSection(course) {
     final instructor = course.instructor!;
-    return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.blue,
-          child: Text(
-            instructor.username[0].toUpperCase(),
-            style: const TextStyle(color: Colors.white),
-          ),
-        ),
-        title: Text(
-          instructor.firstName != null && instructor.lastName != null
-              ? '${instructor.firstName} ${instructor.lastName}'
-              : instructor.username,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text(instructor.email),
-        trailing: const Icon(Icons.verified, color: Colors.blue),
-      ),
+    return InstructorCard(
+      username: instructor.username,
+      firstName: instructor.firstName,
+      lastName: instructor.lastName,
+      email: instructor.email,
     );
   }
 
   Widget _buildProgressSection(CourseDetail courseDetail) {
-    final progreso = courseDetail.progreso ?? 0.0;
-    return Card(
-      color: Colors.green[50],
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Tu Progreso',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  '${progreso.toStringAsFixed(0)}%',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: progreso / 100,
-              minHeight: 8,
-              backgroundColor: Colors.grey[300],
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
-            ),
-          ],
-        ),
-      ),
-    );
+    return CourseProgressCard(courseDetail: courseDetail);
   }
 
   Widget _buildModulesSection(BuildContext context, CourseDetail courseDetail) {
@@ -356,109 +385,11 @@ class _CourseDetailContent extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        ...courseDetail.modulos.map((modulo) => _ModuleCard(
+        ...courseDetail.modulos.map((modulo) => ModuleCard(
               modulo: modulo,
               inscrito: courseDetail.inscrito,
             )),
       ],
-    );
-  }
-}
-
-/// Card de módulo con lista de secciones
-class _ModuleCard extends StatefulWidget {
-  final Module modulo;
-  final bool inscrito;
-
-  const _ModuleCard({
-    required this.modulo,
-    required this.inscrito,
-  });
-
-  @override
-  State<_ModuleCard> createState() => _ModuleCardState();
-}
-
-class _ModuleCardState extends State<_ModuleCard> {
-  bool _isExpanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final totalSecciones = widget.modulo.secciones?.length ?? 0;
-    final duracionTotal = widget.modulo.secciones?.fold<int>(
-          0,
-          (sum, seccion) => sum + (seccion.duracionMinutos ?? 0),
-        ) ??
-        0;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        children: [
-          ListTile(
-            onTap: () {
-              setState(() {
-                _isExpanded = !_isExpanded;
-              });
-            },
-            leading: CircleAvatar(
-              backgroundColor: Theme.of(context).primaryColor,
-              child: Text(
-                '${widget.modulo.orden}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            title: Text(
-              widget.modulo.titulo,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text(
-              '$totalSecciones secciones • $duracionTotal min',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-            trailing: Icon(
-              _isExpanded ? Icons.expand_less : Icons.expand_more,
-            ),
-          ),
-          if (_isExpanded && widget.modulo.secciones != null) ...[
-            const Divider(height: 1),
-            ...widget.modulo.secciones!.map((seccion) => ListTile(
-                  leading: Icon(
-                    seccion.videoUrl != null
-                        ? Icons.play_circle_outline
-                        : Icons.article_outlined,
-                    color: Colors.grey[600],
-                  ),
-                  title: Text(seccion.titulo),
-                  subtitle: Text('${seccion.duracionMinutos ?? 0} min'),
-                  trailing: seccion.esPreview == true
-                      ? Chip(
-                          label: const Text(
-                            'Preview',
-                            style: TextStyle(fontSize: 10),
-                          ),
-                          backgroundColor: Colors.blue[100],
-                        )
-                      : widget.inscrito
-                          ? const Icon(Icons.lock_open, color: Colors.green)
-                          : const Icon(Icons.lock, color: Colors.grey),
-                  onTap: widget.inscrito || seccion.esPreview == true
-                      ? () {
-                          // TODO: Navegar al contenido de la sección
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Abrir: ${seccion.titulo}'),
-                            ),
-                          );
-                        }
-                      : null,
-                )),
-          ],
-        ],
-      ),
     );
   }
 }

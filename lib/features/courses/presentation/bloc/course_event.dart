@@ -60,3 +60,13 @@ class GetMyCoursesEvent extends CourseEvent {
 class RefreshCoursesEvent extends CourseEvent {
   const RefreshCoursesEvent();
 }
+
+/// Marcar sección como completada
+class MarkSectionCompletedEvent extends CourseEvent {
+  final int sectionId;
+
+  const MarkSectionCompletedEvent(this.sectionId);
+
+  @override
+  List<Object> get props => [sectionId];
+}

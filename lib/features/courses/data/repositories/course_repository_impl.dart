@@ -93,4 +93,18 @@ class CourseRepositoryImpl implements CourseRepository {
       return const Left(NetworkFailure(message: 'No hay conexión a internet'));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> markSectionCompleted(int sectionId) async {
+    if (await _networkInfo.isConnected) {
+      try {
+        await _remoteDataSource.markSectionCompleted(sectionId);
+        return const Right(null);
+      } catch (e) {
+        return Left(ServerFailure(message: e.toString()));
+      }
+    } else {
+      return const Left(NetworkFailure(message: 'No hay conexión a internet'));
+    }
+  }
 }

@@ -22,6 +22,7 @@ import '../../features/courses/domain/usecases/get_course_detail_usecase.dart';
 import '../../features/courses/domain/usecases/get_courses_usecase.dart';
 import '../../features/courses/domain/usecases/get_enrolled_courses_usecase.dart';
 import '../../features/courses/domain/usecases/get_my_courses_usecase.dart';
+import '../../features/courses/domain/usecases/mark_section_completed.dart';
 import '../../features/courses/presentation/bloc/course_bloc.dart';
 import '../network/api_client.dart';
 import '../network/dio_interceptor.dart';
@@ -144,6 +145,7 @@ Future<void> initializeDependencies() async {
   getIt.registerLazySingleton(() => EnrollInCourseUseCase(getIt<CourseRepository>()));
   getIt.registerLazySingleton(() => GetEnrolledCoursesUseCase(getIt<CourseRepository>()));
   getIt.registerLazySingleton(() => GetMyCoursesUseCase(getIt<CourseRepository>()));
+  getIt.registerLazySingleton(() => MarkSectionCompleted(getIt<CourseRepository>()));
 
   // BLoC
   getIt.registerFactory(
@@ -153,6 +155,7 @@ Future<void> initializeDependencies() async {
       getIt<EnrollInCourseUseCase>(),
       getIt<GetEnrolledCoursesUseCase>(),
       getIt<GetMyCoursesUseCase>(),
+      getIt<MarkSectionCompleted>(),
     ),
   );
 }

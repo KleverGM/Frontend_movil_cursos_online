@@ -25,6 +25,9 @@ abstract class CourseRemoteDataSource {
 
   /// Obtener cursos creados por el instructor
   Future<List<CourseModel>> getMyCourses();
+
+  /// Marcar una sección como completada
+  Future<void> markSectionCompleted(int sectionId);
 }
 
 class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
@@ -91,7 +94,18 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
     final response = await _apiClient.get(ApiConstants.enrolledCourses);
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = response.data as List<dynamic>;
+      // Verificar si la respuesta es paginada o un array directo
+      final responseData = response.data;
+      final List<dynamic> data;
+      
+      if (responseData is Map<String, dynamic> && responseData.containsKey('results')) {
+        // Respuesta paginada
+        data = responseData['results'] as List<dynamic>;
+      } else {
+        // Array directo
+        data = responseData as List<dynamic>;
+      }
+      
       // Las inscripciones vienen con objeto curso anidado
       return data
           .map((json) {
@@ -113,10 +127,33 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
     final response = await _apiClient.get(ApiConstants.myCourses);
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = response.data as List<dynamic>;
+      // Verificar si la respuesta es paginada o un array directo
+      final responseData = response.data;
+      final List<dynamic> data;
+      
+      if (responseData is Map<String, dynamic> && responseData.containsKey('results')) {
+        // Respuesta paginada
+        data = responseData['results'] as List<dynamic>;
+      } else {
+        // Array directo
+        data = responseData as List<dynamic>;
+      }
+      
       return data.map((json) => CourseModel.fromJson(json as Map<String, dynamic>)).toList();
     } else {
       throw Exception('Error al obtener mis cursos: ${response.statusCode}');
+    }
+  }
+
+  @override
+  Future<void> markSectionCompleted(int sectionId) async {
+    final response = await _apiClient.post(
+      ApiConstants.markSectionCompleted(sectionId),
+      data: {},
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Error al marcar sección como completada: ${response.statusCode}');
     }
   }
 }

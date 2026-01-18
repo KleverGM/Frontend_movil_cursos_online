@@ -81,3 +81,13 @@ class CourseError extends CourseState {
   @override
   List<Object> get props => [message];
 }
+
+/// Sección marcada como completada
+class SectionCompletedSuccess extends CourseState {
+  final int sectionId;
+
+  const SectionCompletedSuccess(this.sectionId);
+
+  @override
+  List<Object> get props => [sectionId];
+}

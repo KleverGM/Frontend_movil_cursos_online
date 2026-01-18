@@ -5,6 +5,7 @@ import '../../domain/usecases/get_course_detail_usecase.dart';
 import '../../domain/usecases/get_courses_usecase.dart';
 import '../../domain/usecases/get_enrolled_courses_usecase.dart';
 import '../../domain/usecases/get_my_courses_usecase.dart';
+import '../../domain/usecases/mark_section_completed.dart';
 import 'course_event.dart';
 import 'course_state.dart';
 
@@ -15,6 +16,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
   final EnrollInCourseUseCase _enrollInCourseUseCase;
   final GetEnrolledCoursesUseCase _getEnrolledCoursesUseCase;
   final GetMyCoursesUseCase _getMyCoursesUseCase;
+  final MarkSectionCompleted _markSectionCompleted;
 
   CourseBloc(
     this._getCoursesUseCase,
@@ -22,6 +24,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     this._enrollInCourseUseCase,
     this._getEnrolledCoursesUseCase,
     this._getMyCoursesUseCase,
+    this._markSectionCompleted,
   ) : super(const CourseInitial()) {
     on<GetCoursesEvent>(_onGetCourses);
     on<GetCourseDetailEvent>(_onGetCourseDetail);
@@ -29,6 +32,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     on<GetEnrolledCoursesEvent>(_onGetEnrolledCourses);
     on<GetMyCoursesEvent>(_onGetMyCourses);
     on<RefreshCoursesEvent>(_onRefreshCourses);
+    on<MarkSectionCompletedEvent>(_onMarkSectionCompleted);
   }
 
   Future<void> _onGetCourses(
@@ -123,5 +127,19 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
   ) async {
     // Recargar la lista de cursos sin filtros
     add(const GetCoursesEvent());
+  }
+
+  Future<void> _onMarkSectionCompleted(
+    MarkSectionCompletedEvent event,
+    Emitter<CourseState> emit,
+  ) async {
+    final result = await _markSectionCompleted(
+      MarkSectionParams(sectionId: event.sectionId),
+    );
+
+    result.fold(
+      (failure) => emit(CourseError(failure.message)),
+      (_) => emit(SectionCompletedSuccess(event.sectionId)),
+    );
   }
 }

@@ -25,4 +25,7 @@ abstract class CourseRepository {
 
   /// Obtener cursos creados por el instructor (si es instructor)
   Future<Either<Failure, List<Course>>> getMyCourses();
+
+  /// Marcar una sección como completada
+  Future<Either<Failure, void>> markSectionCompleted(int sectionId);
 }
