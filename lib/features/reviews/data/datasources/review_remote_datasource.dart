@@ -31,7 +31,7 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
   Future<List<ReviewModel>> getCourseReviews(int cursoId) async {
     final response = await _apiClient.get(
       ApiConstants.reviews,
-      queryParameters: {'curso': cursoId},
+      queryParameters: {'curso_id': cursoId},
     );
 
     if (response.statusCode == 200) {
@@ -54,7 +54,7 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
   Future<ReviewStatsModel> getCourseReviewStats(int cursoId) async {
     final response = await _apiClient.get(
       ApiConstants.courseReviewStats,
-      queryParameters: {'curso': cursoId},
+      queryParameters: {'curso_id': cursoId},
     );
 
     if (response.statusCode == 200) {
@@ -73,8 +73,9 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
     final response = await _apiClient.post(
       ApiConstants.reviews,
       data: {
-        'curso': cursoId,
-        'calificacion': calificacion,
+        'curso_id': cursoId,
+        'rating': calificacion.toDouble(),
+        'titulo': 'Reseña',
         'comentario': comentario,
       },
     );
@@ -95,7 +96,8 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
     final response = await _apiClient.put(
       ApiConstants.reviewDetail(reviewId),
       data: {
-        'calificacion': calificacion,
+        'rating': calificacion.toDouble(),
+        'titulo': 'Reseña',
         'comentario': comentario,
       },
     );

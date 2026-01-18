@@ -1,5 +1,6 @@
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_client.dart';
+import '../../domain/entities/course_filters.dart';
 import '../models/course_detail_model.dart';
 import '../models/course_model.dart';
 import '../models/enrollment_model.dart';
@@ -7,12 +8,7 @@ import '../models/enrollment_model.dart';
 /// DataSource remoto para cursos
 abstract class CourseRemoteDataSource {
   /// Obtener lista de cursos con filtros
-  Future<List<CourseModel>> getCourses({
-    String? categoria,
-    String? nivel,
-    String? search,
-    String? ordering,
-  });
+  Future<List<CourseModel>> getCourses({CourseFilters? filters});
 
   /// Obtener detalle de un curso
   Future<CourseDetailModel> getCourseDetail(int courseId);
@@ -36,18 +32,17 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
   CourseRemoteDataSourceImpl(this._apiClient);
 
   @override
-  Future<List<CourseModel>> getCourses({
-    String? categoria,
-    String? nivel,
-    String? search,
-    String? ordering,
-  }) async {
+  Future<List<CourseModel>> getCourses({CourseFilters? filters}) async {
     // Construir query parameters
     final queryParams = <String, dynamic>{};
-    if (categoria != null) queryParams['categoria'] = categoria;
-    if (nivel != null) queryParams['nivel'] = nivel;
-    if (search != null) queryParams['search'] = search;
-    if (ordering != null) queryParams['ordering'] = ordering;
+    
+    if (filters != null) {
+      if (filters.categoria != null) queryParams['categoria'] = filters.categoria;
+      if (filters.nivel != null) queryParams['nivel'] = filters.nivel;
+      if (filters.searchQuery != null) queryParams['search'] = filters.searchQuery;
+      if (filters.ordenarPor != null) queryParams['ordering'] = filters.ordenarPor;
+      // El backend no tiene filtro directo de precio min/max, pero podemos implementarlo en el frontend
+    }
 
     final response = await _apiClient.get(
       ApiConstants.courses,

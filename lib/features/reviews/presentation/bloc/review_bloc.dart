@@ -56,6 +56,9 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
         if (state is ReviewsLoaded) {
           final currentState = state as ReviewsLoaded;
           emit(ReviewsLoaded(currentState.reviews, stats: stats));
+        } else {
+          // Si no hay reviews cargadas, emitir solo con stats
+          emit(ReviewsLoaded(const [], stats: stats));
         }
       },
     );

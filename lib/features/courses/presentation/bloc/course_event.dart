@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../domain/entities/course_filters.dart';
 
 /// Eventos del BLoC de cursos
 abstract class CourseEvent extends Equatable {
@@ -8,22 +9,14 @@ abstract class CourseEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Obtener lista de cursos
+/// Obtener lista de cursos con filtros
 class GetCoursesEvent extends CourseEvent {
-  final String? categoria;
-  final String? nivel;
-  final String? search;
-  final String? ordering;
+  final CourseFilters? filters;
 
-  const GetCoursesEvent({
-    this.categoria,
-    this.nivel,
-    this.search,
-    this.ordering,
-  });
+  const GetCoursesEvent({this.filters});
 
   @override
-  List<Object?> get props => [categoria, nivel, search, ordering];
+  List<Object?> get props => [filters];
 }
 
 /// Obtener detalle de un curso

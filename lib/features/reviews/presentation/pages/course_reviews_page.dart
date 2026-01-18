@@ -70,10 +70,12 @@ class CourseReviewsPage extends StatelessWidget {
           },
         ),
         floatingActionButton: canReview
-            ? FloatingActionButton.extended(
-                onPressed: () => _showCreateReviewDialog(context),
-                icon: const Icon(Icons.rate_review),
-                label: const Text('Escribir reseña'),
+            ? Builder(
+                builder: (context) => FloatingActionButton.extended(
+                  onPressed: () => _showCreateReviewDialog(context),
+                  icon: const Icon(Icons.rate_review),
+                  label: const Text('Escribir reseña'),
+                ),
               )
             : null,
       ),
@@ -179,14 +181,13 @@ class CourseReviewsPage extends StatelessWidget {
   }
 
   void _showCreateReviewDialog(BuildContext context) {
+    final reviewBloc = context.read<ReviewBloc>();
     showDialog(
       context: context,
-      builder: (dialogContext) => BlocProvider.value(
-        value: context.read<ReviewBloc>(),
-        child: CreateReviewDialog(
-          cursoId: cursoId,
-          cursoTitulo: cursoTitulo,
-        ),
+      builder: (dialogContext) => CreateReviewDialog(
+        cursoId: cursoId,
+        cursoTitulo: cursoTitulo,
+        reviewBloc: reviewBloc,
       ),
     );
   }

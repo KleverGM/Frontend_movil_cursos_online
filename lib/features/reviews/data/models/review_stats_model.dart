@@ -10,15 +10,15 @@ class ReviewStatsModel extends ReviewStats {
 
   factory ReviewStatsModel.fromJson(Map<String, dynamic> json) {
     final distribucion = <int, int>{};
-    if (json['distribucion_estrellas'] != null) {
-      final dist = json['distribucion_estrellas'] as Map<String, dynamic>;
+    if (json['distribucion'] != null) {
+      final dist = json['distribucion'] as Map<String, dynamic>;
       dist.forEach((key, value) {
         distribucion[int.parse(key)] = value as int;
       });
     }
 
     return ReviewStatsModel(
-      calificacionPromedio: (json['calificacion_promedio'] as num?)?.toDouble() ?? 0.0,
+      calificacionPromedio: (json['rating_promedio'] as num?)?.toDouble() ?? 0.0,
       totalResenas: json['total_resenas'] as int? ?? 0,
       distribucionEstrellas: distribucion,
     );

@@ -18,19 +18,17 @@ class ReviewModel extends Review {
 
   factory ReviewModel.fromJson(Map<String, dynamic> json) {
     return ReviewModel(
-      id: json['_id'] as String,
-      cursoId: json['curso'] as int,
-      estudianteId: json['estudiante'] as int,
-      estudianteNombre: json['estudiante_nombre'] as String? ?? 'Anónimo',
-      calificacion: json['calificacion'] as int,
+      id: json['id'] as String,
+      cursoId: json['curso_id'] as int,
+      estudianteId: json['usuario_id'] as int,
+      estudianteNombre: json['nombre_usuario'] as String? ?? 'Anónimo',
+      calificacion: (json['rating'] as num).toInt(),
       comentario: json['comentario'] as String,
       fechaCreacion: DateTime.parse(json['fecha_creacion'] as String),
-      utilesCount: json['utiles_count'] as int? ?? 0,
-      marcadoUtilPorMi: json['marcado_util_por_mi'] as bool? ?? false,
-      respuestaInstructor: json['respuesta_instructor'] as String?,
-      fechaRespuesta: json['fecha_respuesta'] != null
-          ? DateTime.parse(json['fecha_respuesta'] as String)
-          : null,
+      utilesCount: json['util_count'] as int? ?? 0,
+      marcadoUtilPorMi: (json['usuarios_util'] as List?)?.contains(json['usuario_id']) ?? false,
+      respuestaInstructor: null, // Extraer de respuestas si existe
+      fechaRespuesta: null,
     );
   }
 

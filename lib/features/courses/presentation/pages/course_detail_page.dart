@@ -174,14 +174,21 @@ class CourseDetailPage extends StatelessWidget {
 }
 
 /// Widget con el contenido del detalle del curso
-class _CourseDetailContent extends StatelessWidget {
+class _CourseDetailContent extends StatefulWidget {
   final CourseDetail courseDetail;
 
   const _CourseDetailContent({required this.courseDetail});
 
   @override
+  State<_CourseDetailContent> createState() => _CourseDetailContentState();
+}
+
+class _CourseDetailContentState extends State<_CourseDetailContent> {
+  Key _reviewsKey = UniqueKey();
+
+  @override
   Widget build(BuildContext context) {
-    final course = courseDetail.course;
+    final course = widget.courseDetail.course;
 
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
@@ -262,17 +269,17 @@ class _CourseDetailContent extends StatelessWidget {
                 ],
 
                 // Progreso (si está inscrito)
-                if (courseDetail.inscrito) ...[
-                  _buildProgressSection(courseDetail),
+                if (widget.courseDetail.inscrito) ...[
+                  _buildProgressSection(widget.courseDetail),
                   const SizedBox(height: 24),
                 ],
 
                 // Reseñas
-                _buildReviewsSection(context, courseDetail),
+                _buildReviewsSection(context, widget.courseDetail),
                 const SizedBox(height: 24),
 
                 // Módulos y Secciones
-                _buildModulesSection(context, courseDetail),
+                _buildModulesSection(context, widget.courseDetail),
                 const SizedBox(height: 100), // Espacio para el botón flotante
               ],
             ),
@@ -364,6 +371,7 @@ class _CourseDetailContent extends StatelessWidget {
 
   Widget _buildReviewsSection(BuildContext context, CourseDetail courseDetail) {
     return BlocProvider(
+      key: _reviewsKey,
       create: (context) => getIt<ReviewBloc>()
         ..add(GetCourseReviewStatsEvent(courseDetail.course.id)),
       child: BlocBuilder<ReviewBloc, ReviewState>(
@@ -398,8 +406,8 @@ class _CourseDetailContent extends StatelessWidget {
                           ),
                         ),
                         TextButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
+                          onPressed: () async {
+                            await Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (context) => CourseReviewsPage(
                                   cursoId: courseDetail.course.id,
@@ -408,6 +416,12 @@ class _CourseDetailContent extends StatelessWidget {
                                 ),
                               ),
                             );
+                            // Recargar estadísticas al regresar
+                            if (mounted) {
+                              setState(() {
+                                _reviewsKey = UniqueKey();
+                              });
+                            }
                           },
                           child: const Text('Ver todas'),
                         ),
@@ -519,8 +533,8 @@ class _CourseDetailContent extends StatelessWidget {
                       ),
                       if (courseDetail.inscrito)
                         TextButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
+                          onPressed: () async {
+                            await Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (context) => CourseReviewsPage(
                                   cursoId: courseDetail.course.id,
@@ -529,6 +543,12 @@ class _CourseDetailContent extends StatelessWidget {
                                 ),
                               ),
                             );
+                            // Recargar estadísticas al regresar
+                            if (mounted) {
+                              setState(() {
+                                _reviewsKey = UniqueKey();
+                              });
+                            }
                           },
                           child: const Text('Escribir reseña'),
                         ),

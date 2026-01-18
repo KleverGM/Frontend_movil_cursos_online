@@ -8,11 +8,13 @@ import '../widgets/rating_input.dart';
 class CreateReviewDialog extends StatefulWidget {
   final int cursoId;
   final String cursoTitulo;
+  final ReviewBloc reviewBloc;
 
   const CreateReviewDialog({
     super.key,
     required this.cursoId,
     required this.cursoTitulo,
+    required this.reviewBloc,
   });
 
   @override
@@ -143,13 +145,13 @@ class _CreateReviewDialogState extends State<CreateReviewDialog> {
     }
 
     if (_formKey.currentState!.validate()) {
-      context.read<ReviewBloc>().add(
-            CreateReviewEvent(
-              cursoId: widget.cursoId,
-              calificacion: _calificacion,
-              comentario: _comentarioController.text.trim(),
-            ),
-          );
+      widget.reviewBloc.add(
+        CreateReviewEvent(
+          cursoId: widget.cursoId,
+          calificacion: _calificacion,
+          comentario: _comentarioController.text.trim(),
+        ),
+      );
       Navigator.of(context).pop();
     }
   }

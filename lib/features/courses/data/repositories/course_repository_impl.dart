@@ -3,6 +3,7 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/network/network_info.dart';
 import '../../domain/entities/course.dart';
 import '../../domain/entities/course_detail.dart';
+import '../../domain/entities/course_filters.dart';
 import '../../domain/entities/enrollment.dart';
 import '../../domain/repositories/course_repository.dart';
 import '../datasources/course_remote_datasource.dart';
@@ -15,20 +16,10 @@ class CourseRepositoryImpl implements CourseRepository {
   CourseRepositoryImpl(this._remoteDataSource, this._networkInfo);
 
   @override
-  Future<Either<Failure, List<Course>>> getCourses({
-    String? categoria,
-    String? nivel,
-    String? search,
-    String? ordering,
-  }) async {
+  Future<Either<Failure, List<Course>>> getCourses({CourseFilters? filters}) async {
     if (await _networkInfo.isConnected) {
       try {
-        final courses = await _remoteDataSource.getCourses(
-          categoria: categoria,
-          nivel: nivel,
-          search: search,
-          ordering: ordering,
-        );
+        final courses = await _remoteDataSource.getCourses(filters: filters);
         return Right(courses);
       } catch (e) {
         return Left(ServerFailure(message: e.toString()));

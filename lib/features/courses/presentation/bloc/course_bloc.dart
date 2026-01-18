@@ -42,19 +42,28 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     emit(const CourseLoading());
 
     final result = await _getCoursesUseCase(
-      GetCoursesParams(
-        categoria: event.categoria,
-        nivel: event.nivel,
-        search: event.search,
-        ordering: event.ordering,
-      ),
+      GetCoursesParams(filters: event.filters),
     );
 
     result.fold(
       (failure) => emit(CourseError(failure.message)),
       (courses) {
-        final filter = event.categoria ?? event.nivel ?? event.search;
-        emit(CoursesLoaded(courses, activeFilter: filter));
+        // Aplicar filtros de precio en el frontend si están definidos
+        var filteredCourses = courses;
+        if (event.filters?.precioMin != null || event.filters?.precioMax != null) {
+          filteredCourses = courses.where((course) {
+            if (event.filters?.precioMin != null && course.precio < event.filters!.precioMin!) {
+              return false;
+            }
+            if (event.filters?.precioMax != null && course.precio > event.filters!.precioMax!) {
+              return false;
+            }
+            return true;
+          }).toList();
+        }
+        
+        final hasFilters = event.filters?.hasActiveFilters ?? false;
+        emit(CoursesLoaded(filteredCourses, activeFilter: hasFilters ? 'filtered' : null));
       },
     );
   }
