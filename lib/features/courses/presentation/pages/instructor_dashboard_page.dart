@@ -86,6 +86,28 @@ class _InstructorDashboardPageState extends State<InstructorDashboardPage> {
               _isLoading = false;
               _errorMessage = null;
             });
+          } else if (state is CourseDeletedSuccess) {
+            // Recargar la lista después de eliminar un curso
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Curso desactivado correctamente'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            _loadMyCourses();
+          } else if (state is CourseActivatedSuccess || state is CourseDeactivatedSuccess) {
+            // Recargar la lista después de activar/desactivar
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  state is CourseActivatedSuccess 
+                    ? 'Curso activado correctamente'
+                    : 'Curso desactivado correctamente',
+                ),
+                backgroundColor: Colors.green,
+              ),
+            );
+            _loadMyCourses();
           } else if (state is CourseError) {
             setState(() {
               _isLoading = false;
@@ -145,6 +167,13 @@ class _InstructorDashboardPageState extends State<InstructorDashboardPage> {
   }
 
   Widget _buildDashboardContent(BuildContext context, List<Course> courses) {
+    // Ordenar: cursos activos primero, inactivos al final
+    final sortedCourses = List<Course>.from(courses)
+      ..sort((a, b) {
+        if (a.activo == b.activo) return 0;
+        return a.activo ? -1 : 1;
+      });
+    
     final stats = _calculateStats(courses);
 
     return RefreshIndicator(
@@ -196,10 +225,10 @@ class _InstructorDashboardPageState extends State<InstructorDashboardPage> {
             ),
             const SizedBox(height: 16),
 
-            if (courses.isEmpty)
+            if (sortedCourses.isEmpty)
               _buildEmptyState()
             else
-              ...courses.map((course) => Padding(
+              ...sortedCourses.map((course) => Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: InstructorCourseCard(course: course),
                   )),

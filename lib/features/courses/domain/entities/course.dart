@@ -17,6 +17,8 @@ class Course extends Equatable {
   final int totalSecciones;
   final int duracionTotal;
   final int totalEstudiantes;
+  final String? instructorNombre;
+  final double calificacionPromedio;
 
   const Course({
     required this.id,
@@ -33,6 +35,8 @@ class Course extends Equatable {
     this.totalSecciones = 0,
     this.duracionTotal = 0,
     this.totalEstudiantes = 0,
+    this.instructorNombre,
+    this.calificacionPromedio = 0.0,
   });
 
   // Getters de utilidad
@@ -99,5 +103,7 @@ class Course extends Equatable {
         totalSecciones,
         duracionTotal,
         totalEstudiantes,
+        instructorNombre,
+        calificacionPromedio,
       ];
 }

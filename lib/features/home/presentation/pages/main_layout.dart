@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../courses/presentation/pages/courses_page.dart';
-import '../../../courses/presentation/pages/my_courses_page.dart';
+import '../../../courses/presentation/pages/student_courses_page.dart';
 import 'home_page.dart';
 import 'profile_page.dart';
 
@@ -42,7 +42,7 @@ class MainLayoutState extends State<MainLayout> {
     _pages = [
       const HomePage(),
       const CoursesPage(),
-      const MyCoursesPage(),
+      const StudentCoursesPage(),
       const ProfilePage(),
     ];
   }

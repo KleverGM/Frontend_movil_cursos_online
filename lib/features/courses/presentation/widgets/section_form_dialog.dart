@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 
 /// Diálogo para crear o editar una sección
 class SectionFormDialog extends StatefulWidget {
   final String? initialTitulo;
   final String? initialContenido;
   final String? initialVideoUrl;
+  final String? initialArchivo;
   final int? initialDuracionMinutos;
   final bool? initialEsPreview;
   final int orden;
@@ -16,6 +19,7 @@ class SectionFormDialog extends StatefulWidget {
     this.initialTitulo,
     this.initialContenido,
     this.initialVideoUrl,
+    this.initialArchivo,
     this.initialDuracionMinutos,
     this.initialEsPreview,
     required this.orden,
@@ -33,6 +37,8 @@ class _SectionFormDialogState extends State<SectionFormDialog> {
   late TextEditingController _duracionController;
   final _formKey = GlobalKey<FormState>();
   bool _esPreview = false;
+  File? _selectedFile;
+  String? _existingFileName;
 
   @override
   void initState() {
@@ -44,6 +50,11 @@ class _SectionFormDialogState extends State<SectionFormDialog> {
       text: widget.initialDuracionMinutos?.toString() ?? '0',
     );
     _esPreview = widget.initialEsPreview ?? false;
+    
+    // Extraer nombre del archivo existente si hay
+    if (widget.initialArchivo != null && widget.initialArchivo!.isNotEmpty) {
+      _existingFileName = widget.initialArchivo!.split('/').last;
+    }
   }
 
   @override
@@ -53,6 +64,27 @@ class _SectionFormDialogState extends State<SectionFormDialog> {
     _videoUrlController.dispose();
     _duracionController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickFile() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt', 'zip', 'rar'],
+      );
+
+      if (result != null && result.files.single.path != null) {
+        setState(() {
+          _selectedFile = File(result.files.single.path!);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al seleccionar archivo: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -121,6 +153,101 @@ class _SectionFormDialogState extends State<SectionFormDialog> {
                 keyboardType: TextInputType.url,
               ),
               const SizedBox(height: 16),
+              // Sección de archivo
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.attach_file, size: 20),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Archivo adjunto (opcional)',
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    if (_selectedFile != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade50,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.insert_drive_file, color: Colors.green.shade700),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _selectedFile!.path.split('/').last,
+                                style: TextStyle(color: Colors.green.shade700),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close, size: 20),
+                              onPressed: () {
+                                setState(() {
+                                  _selectedFile = null;
+                                });
+                              },
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ] else if (_existingFileName != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.insert_drive_file, color: Colors.blue.shade700),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _existingFileName!,
+                                style: TextStyle(color: Colors.blue.shade700),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ] else ...[
+                      Text(
+                        'No hay archivo seleccionado',
+                        style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                      ),
+                    ],
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _pickFile,
+                        icon: const Icon(Icons.upload_file),
+                        label: const Text('Seleccionar archivo'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _duracionController,
                 decoration: const InputDecoration(
@@ -174,6 +301,7 @@ class _SectionFormDialogState extends State<SectionFormDialog> {
                     : _videoUrlController.text.trim(),
                 'duracionMinutos': int.parse(_duracionController.text.trim()),
                 'esPreview': _esPreview,
+                'archivo': _selectedFile, // Enviar el File seleccionado
               });
             }
           },

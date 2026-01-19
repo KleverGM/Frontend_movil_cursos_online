@@ -3,6 +3,7 @@ import '../../domain/usecases/create_section.dart';
 import '../../domain/usecases/delete_section.dart';
 import '../../domain/usecases/get_sections_by_module.dart';
 import '../../domain/usecases/update_section.dart';
+import '../../domain/usecases/mark_section_completed.dart';
 import 'section_event.dart';
 import 'section_state.dart';
 
@@ -11,17 +12,20 @@ class SectionBloc extends Bloc<SectionEvent, SectionState> {
   final CreateSectionUseCase _createSectionUseCase;
   final UpdateSectionUseCase _updateSectionUseCase;
   final DeleteSectionUseCase _deleteSectionUseCase;
+  final MarkSectionCompleted _markSectionCompleted;
 
   SectionBloc(
     this._getSectionsByModuleUseCase,
     this._createSectionUseCase,
     this._updateSectionUseCase,
     this._deleteSectionUseCase,
+    this._markSectionCompleted,
   ) : super(const SectionInitial()) {
     on<GetSectionsByModuleEvent>(_onGetSectionsByModule);
     on<CreateSectionEvent>(_onCreateSection);
     on<UpdateSectionEvent>(_onUpdateSection);
     on<DeleteSectionEvent>(_onDeleteSection);
+    on<MarkSectionCompletedEvent>(_onMarkSectionCompleted);
   }
 
   Future<void> _onGetSectionsByModule(
@@ -34,7 +38,7 @@ class SectionBloc extends Bloc<SectionEvent, SectionState> {
 
     result.fold(
       (failure) => emit(SectionError(failure.message)),
-      (sections) => emit(SectionsLoaded(sections)),
+      (sections) => emit(SectionListLoaded(sections, event.moduleId)),
     );
   }
 
@@ -95,6 +99,20 @@ class SectionBloc extends Bloc<SectionEvent, SectionState> {
     result.fold(
       (failure) => emit(SectionError(failure.message)),
       (_) => emit(const SectionDeleted()),
+    );
+  }
+
+  Future<void> _onMarkSectionCompleted(
+    MarkSectionCompletedEvent event,
+    Emitter<SectionState> emit,
+  ) async {
+    final result = await _markSectionCompleted(
+      MarkSectionParams(sectionId: event.sectionId),
+    );
+
+    result.fold(
+      (failure) => emit(SectionError(failure.message)),
+      (_) => emit(SectionCompletedSuccess(event.sectionId)),
     );
   }
 }

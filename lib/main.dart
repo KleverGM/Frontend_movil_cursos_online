@@ -8,6 +8,9 @@ import 'core/router/app_router.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/courses/presentation/bloc/course_bloc.dart';
+import 'features/courses/presentation/bloc/module_bloc.dart';
+import 'features/courses/presentation/bloc/section_bloc.dart';
+import 'features/reviews/presentation/bloc/review_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +33,15 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => getIt<CourseBloc>(),
+        ),
+        BlocProvider(
+          create: (_) => getIt<ModuleBloc>(),
+        ),
+        BlocProvider(
+          create: (_) => getIt<SectionBloc>(),
+        ),
+        BlocProvider(
+          create: (_) => getIt<ReviewBloc>(),
         ),
       ],
       child: MaterialApp.router(

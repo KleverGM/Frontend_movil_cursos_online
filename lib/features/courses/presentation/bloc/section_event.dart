@@ -92,3 +92,12 @@ class DeleteSectionEvent extends SectionEvent {
   @override
   List<Object> get props => [sectionId];
 }
+
+class MarkSectionCompletedEvent extends SectionEvent {
+  final int sectionId;
+
+  const MarkSectionCompletedEvent(this.sectionId);
+
+  @override
+  List<Object> get props => [sectionId];
+}

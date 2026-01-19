@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import '../../domain/entities/course.dart';
 import '../../domain/entities/course_detail.dart';
 import '../../domain/entities/enrollment_detail.dart';
+import '../../domain/entities/course_stats.dart';
 
 /// Estados del BLoC de cursos
 abstract class CourseState extends Equatable {
@@ -151,4 +152,14 @@ class InstructorEnrollmentsLoaded extends CourseState {
 
   @override
   List<Object> get props => [enrollments];
+}
+
+/// Estadísticas de curso cargadas
+class CourseStatsLoaded extends CourseState {
+  final CourseStats stats;
+
+  const CourseStatsLoaded(this.stats);
+
+  @override
+  List<Object> get props => [stats];
 }

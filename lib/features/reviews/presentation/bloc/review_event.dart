@@ -77,3 +77,11 @@ class DeleteReviewEvent extends ReviewEvent {
   @override
   List<Object> get props => [reviewId];
 }
+
+/// Obtener todas las reseñas del instructor
+class GetMyReviewsEvent extends ReviewEvent {
+  const GetMyReviewsEvent();
+
+  @override
+  List<Object> get props => [];
+}

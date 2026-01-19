@@ -86,12 +86,16 @@ class ManageModulesPage extends StatelessWidget {
                 onRefresh: () async {
                   context.read<ModuleBloc>().add(GetModulesByCourseEvent(course.id));
                 },
-                child: ListView.builder(
+                child: ReorderableListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: state.modules.length,
+                  onReorder: (oldIndex, newIndex) {
+                    _onReorderModules(context, state.modules, oldIndex, newIndex);
+                  },
                   itemBuilder: (context, index) {
                     final module = state.modules[index];
                     return InstructorModuleCard(
+                      key: ValueKey(module.id),
                       module: module,
                       onTap: () {
                         Navigator.push(
@@ -195,6 +199,43 @@ class ManageModulesPage extends StatelessWidget {
     );
   }
 
+  void _onReorderModules(
+    BuildContext context,
+    List<Module> modules,
+    int oldIndex,
+    int newIndex,
+  ) {
+    // Ajustar newIndex si movemos hacia abajo
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+
+    // Reordenar la lista localmente
+    final updatedModules = List<Module>.from(modules);
+    final movedModule = updatedModules.removeAt(oldIndex);
+    updatedModules.insert(newIndex, movedModule);
+
+    // Actualizar el orden de cada módulo afectado
+    for (int i = 0; i < updatedModules.length; i++) {
+      if (updatedModules[i].orden != i + 1) {
+        context.read<ModuleBloc>().add(
+              UpdateModuleEvent(
+                moduleId: updatedModules[i].id,
+                titulo: updatedModules[i].titulo,
+                descripcion: updatedModules[i].descripcion,
+                orden: i + 1,
+              ),
+            );
+      }
+    }
+
+    // Recargar después de un pequeño delay
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (context.mounted) {
+        context.read<ModuleBloc>().add(GetModulesByCourseEvent(course.id));
+      }
+    });
+  }
 
   void _showHelp(BuildContext context) {
     showDialog(
@@ -224,7 +265,7 @@ class ManageModulesPage extends StatelessWidget {
               ),
               _buildHelpItem(
                 '↕️ Orden',
-                'Arrastra para reordenar módulos y secciones.',
+                'Mantén presionado y arrastra un módulo para reordenarlo.',
               ),
             ],
           ),

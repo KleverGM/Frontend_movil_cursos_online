@@ -36,6 +36,12 @@ class InstructorModuleCard extends StatelessWidget {
             children: [
               Row(
                 children: [
+                  Icon(
+                    Icons.drag_handle,
+                    color: Colors.grey[400],
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(

@@ -9,6 +9,7 @@ import '../pages/course_enrollments_page.dart';
 import '../pages/course_stats_page.dart';
 import '../pages/course_form_page.dart';
 import '../pages/manage_modules_page.dart';
+import '../pages/course_preview_page.dart';
 
 /// Tarjeta de curso para instructores con acciones adicionales
 class InstructorCourseCard extends StatelessWidget {
@@ -317,44 +318,114 @@ class InstructorCourseCard extends StatelessWidget {
               ),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.dashboard_customize, size: 20),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ManageModulesPage(course: course),
-                ),
-              );
-            },
-            tooltip: 'Gestionar módulos',
-            color: Colors.purple,
+          if (course.activo) ...[
+            IconButton(
+              icon: const Icon(Icons.remove_red_eye, size: 20),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CoursePreviewPage(
+                      courseId: course.id,
+                      courseTitle: course.titulo,
+                    ),
+                  ),
+                );
+              },
+              tooltip: 'Vista previa',
+              color: Colors.teal,
+            ),
+            IconButton(
+              icon: const Icon(Icons.dashboard_customize, size: 20),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ManageModulesPage(course: course),
+                  ),
+                );
+              },
+              tooltip: 'Gestionar módulos',
+              color: Colors.purple,
+            ),
+            IconButton(
+              icon: const Icon(Icons.edit, size: 20),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CourseFormPage(course: course),
+                  ),
+                );
+              },
+              tooltip: 'Editar curso',
+              color: theme.colorScheme.secondary,
+            ),
+            IconButton(
+              icon: const Icon(Icons.bar_chart, size: 20),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CourseStatsPage(course: course),
+                  ),
+                );
+              },
+              tooltip: 'Ver estadísticas',
+              color: theme.colorScheme.tertiary,
+            ),
+          ] else ...[
+            IconButton(
+              icon: const Icon(Icons.refresh, size: 20),
+              onPressed: () {
+                _showActivateDialog(context);
+              },
+              tooltip: 'Reactivar curso',
+              color: Colors.green,
+            ),
+            IconButton(
+              icon: const Icon(Icons.edit, size: 20),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CourseFormPage(course: course),
+                  ),
+                );
+              },
+              tooltip: 'Editar curso',
+              color: theme.colorScheme.secondary,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  void _showActivateDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Reactivar Curso'),
+        content: Text(
+          '¿Deseas reactivar "${course.titulo}"? El curso volverá a estar visible en el catálogo público.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancelar'),
           ),
-          IconButton(
-            icon: const Icon(Icons.edit, size: 20),
+          ElevatedButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CourseFormPage(course: course),
-                ),
+              Navigator.pop(dialogContext);
+              context.read<CourseBloc>().add(
+                ActivateCourseEvent(course.id),
               );
             },
-            tooltip: 'Editar curso',
-            color: theme.colorScheme.secondary,
-          ),
-          IconButton(
-            icon: const Icon(Icons.bar_chart, size: 20),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CourseStatsPage(course: course),
-                ),
-              );
-            },
-            tooltip: 'Ver estadísticas',
-            color: theme.colorScheme.tertiary,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+            ),
+            child: const Text('Reactivar'),
           ),
         ],
       ),

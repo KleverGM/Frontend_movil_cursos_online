@@ -47,6 +47,25 @@ class SectionDeleted extends SectionState {
   const SectionDeleted();
 }
 
+class SectionListLoaded extends SectionState {
+  final List<Section> sections;
+  final int moduleId;
+
+  const SectionListLoaded(this.sections, this.moduleId);
+
+  @override
+  List<Object> get props => [sections, moduleId];
+}
+
+class SectionCompletedSuccess extends SectionState {
+  final int sectionId;
+
+  const SectionCompletedSuccess(this.sectionId);
+
+  @override
+  List<Object> get props => [sectionId];
+}
+
 class SectionError extends SectionState {
   final String message;
 

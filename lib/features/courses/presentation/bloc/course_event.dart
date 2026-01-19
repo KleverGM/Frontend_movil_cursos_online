@@ -164,3 +164,13 @@ class GetInstructorEnrollmentsEvent extends CourseEvent {
   @override
   List<Object?> get props => [courseId];
 }
+
+/// Obtener estadísticas de un curso
+class GetCourseStatsEvent extends CourseEvent {
+  final int courseId;
+
+  const GetCourseStatsEvent(this.courseId);
+
+  @override
+  List<Object> get props => [courseId];
+}

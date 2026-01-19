@@ -296,12 +296,25 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
   
   @override
   Future<void> deleteCourse(int courseId) async {
-    final response = await _apiClient.delete(
-      ApiConstants.courseDetail(courseId),
-    );
+    try {
+      final response = await _apiClient.delete(
+        ApiConstants.courseDetail(courseId),
+      );
 
-    if (response.statusCode != 200 && response.statusCode != 204) {
-      throw Exception('Error al eliminar curso: ${response.statusCode}');
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Error al eliminar curso: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 403) {
+        throw Exception('No tienes permisos para eliminar este curso');
+      } else if (e.response?.statusCode == 400) {
+        final error = e.response?.data;
+        if (error is Map && error.containsKey('error')) {
+          throw Exception(error['error']);
+        }
+        throw Exception('No se puede eliminar el curso: ${e.response?.data}');
+      }
+      throw Exception('Error al eliminar curso: ${e.message}');
     }
   }
 

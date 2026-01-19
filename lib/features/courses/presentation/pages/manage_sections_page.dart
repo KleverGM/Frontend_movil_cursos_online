@@ -94,12 +94,16 @@ class ManageSectionsPage extends StatelessWidget {
                 onRefresh: () async {
                   context.read<SectionBloc>().add(GetSectionsByModuleEvent(module.id));
                 },
-                child: ListView.builder(
+                child: ReorderableListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: state.sections.length,
+                  onReorder: (oldIndex, newIndex) {
+                    _onReorderSections(context, state.sections, oldIndex, newIndex);
+                  },
                   itemBuilder: (context, index) {
                     final section = state.sections[index];
                     return InstructorSectionCard(
+                      key: ValueKey(section.id),
                       section: section,
                       onTap: () => _showEditSectionDialog(context, section),
                       onEdit: () => _showEditSectionDialog(context, section),
@@ -142,6 +146,7 @@ class ManageSectionsPage extends StatelessWidget {
               titulo: result['titulo'],
               contenido: result['contenido'],
               videoUrl: result['videoUrl'],
+              archivoPath: result['archivo']?.path, // Obtener path del File
               orden: orden,
               duracionMinutos: result['duracionMinutos'],
               esPreview: result['esPreview'],
@@ -157,6 +162,7 @@ class ManageSectionsPage extends StatelessWidget {
         initialTitulo: section.titulo,
         initialContenido: section.contenido,
         initialVideoUrl: section.videoUrl,
+        initialArchivo: section.archivo,
         initialDuracionMinutos: section.duracionMinutos,
         initialEsPreview: section.esPreview,
         orden: section.orden,
@@ -171,6 +177,7 @@ class ManageSectionsPage extends StatelessWidget {
               titulo: result['titulo'],
               contenido: result['contenido'],
               videoUrl: result['videoUrl'],
+              archivoPath: result['archivo']?.path, // Obtener path del File
               orden: section.orden,
               duracionMinutos: result['duracionMinutos'],
               esPreview: result['esPreview'],
@@ -205,6 +212,47 @@ class ManageSectionsPage extends StatelessWidget {
     );
   }
 
+  void _onReorderSections(
+    BuildContext context,
+    List<Section> sections,
+    int oldIndex,
+    int newIndex,
+  ) {
+    // Ajustar newIndex si movemos hacia abajo
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+
+    // Reordenar la lista localmente
+    final updatedSections = List<Section>.from(sections);
+    final movedSection = updatedSections.removeAt(oldIndex);
+    updatedSections.insert(newIndex, movedSection);
+
+    // Actualizar el orden de cada sección afectada
+    for (int i = 0; i < updatedSections.length; i++) {
+      if (updatedSections[i].orden != i + 1) {
+        context.read<SectionBloc>().add(
+              UpdateSectionEvent(
+                sectionId: updatedSections[i].id,
+                titulo: updatedSections[i].titulo,
+                contenido: updatedSections[i].contenido,
+                videoUrl: updatedSections[i].videoUrl,
+                orden: i + 1,
+                duracionMinutos: updatedSections[i].duracionMinutos,
+                esPreview: updatedSections[i].esPreview,
+              ),
+            );
+      }
+    }
+
+    // Recargar después de un pequeño delay
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (context.mounted) {
+        context.read<SectionBloc>().add(GetSectionsByModuleEvent(module.id));
+      }
+    });
+  }
+
   void _showHelp(BuildContext context) {
     showDialog(
       context: context,
@@ -230,6 +278,10 @@ class ManageSectionsPage extends StatelessWidget {
               _buildHelpItem(
                 '👁️ Preview',
                 'Marca secciones como preview para que usuarios no inscritos puedan verlas.',
+              ),
+              _buildHelpItem(
+                '↕️ Orden',
+                'Mantén presionado y arrastra una sección para reordenarla.',
               ),
               _buildHelpItem(
                 '📎 Archivos',

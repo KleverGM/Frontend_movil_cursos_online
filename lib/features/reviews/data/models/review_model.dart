@@ -1,10 +1,13 @@
 import '../../domain/entities/review.dart';
+import '../../domain/entities/review_response.dart';
+import 'review_response_model.dart';
 
 /// Modelo de reseña para la capa de datos
 class ReviewModel extends Review {
   const ReviewModel({
     required super.id,
     required super.cursoId,
+    required super.cursoTitulo,
     required super.estudianteId,
     required super.estudianteNombre,
     required super.calificacion,
@@ -14,15 +17,29 @@ class ReviewModel extends Review {
     super.marcadoUtilPorMi,
     super.respuestaInstructor,
     super.fechaRespuesta,
+    super.respuestas,
   });
 
   factory ReviewModel.fromJson(Map<String, dynamic> json) {
-    // Extraer respuesta del instructor del array 'respuestas' si existe
+    // Mapear respuestas desde el array 'respuestas'
+    List<ReviewResponse> respuestasList = [];
     String? respuestaInstructor;
     DateTime? fechaRespuesta;
     
     final respuestas = json['respuestas'] as List?;
     if (respuestas != null && respuestas.isNotEmpty) {
+      // Convertir todas las respuestas
+      for (final respuestaJson in respuestas) {
+        if (respuestaJson is Map<String, dynamic>) {
+          final respuestaModel = ReviewResponseModel.fromJson(
+            respuestaJson,
+            instructorId: null, // Se determina en el datasource
+          );
+          respuestasList.add(respuestaModel);
+        }
+      }
+      
+      // Mantener compatibilidad: obtener la primera respuesta como respuestaInstructor
       final primeraRespuesta = respuestas[0] as Map<String, dynamic>;
       respuestaInstructor = primeraRespuesta['texto'] as String?;
       if (primeraRespuesta['fecha'] != null) {
@@ -33,6 +50,7 @@ class ReviewModel extends Review {
     return ReviewModel(
       id: json['id'].toString(),
       cursoId: json['curso_id'] as int,
+      cursoTitulo: json['titulo_curso'] as String? ?? 'Curso ${json['curso_id']}',
       estudianteId: json['usuario_id'] as int,
       estudianteNombre: json['nombre_usuario'] as String? ?? 'Anónimo',
       calificacion: (json['rating'] as num).toInt(),
@@ -42,6 +60,7 @@ class ReviewModel extends Review {
       marcadoUtilPorMi: (json['usuarios_util'] as List?)?.contains(json['usuario_id']) ?? false,
       respuestaInstructor: respuestaInstructor,
       fechaRespuesta: fechaRespuesta,
+      respuestas: respuestasList,
     );
   }
 

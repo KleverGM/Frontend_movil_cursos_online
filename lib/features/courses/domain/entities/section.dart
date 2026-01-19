@@ -11,6 +11,8 @@ class Section extends Equatable {
   final int moduloId;
   final int duracionMinutos;
   final bool esPreview;
+  final bool completado;
+  final String? archivoUrl;
 
   const Section({
     required this.id,
@@ -22,6 +24,8 @@ class Section extends Equatable {
     required this.moduloId,
     this.duracionMinutos = 0,
     this.esPreview = false,
+    this.completado = false,
+    this.archivoUrl,
   });
 
   bool get tieneVideo => videoUrl != null && videoUrl!.isNotEmpty;
@@ -38,5 +42,7 @@ class Section extends Equatable {
         moduloId,
         duracionMinutos,
         esPreview,
+        completado,
+        archivoUrl,
       ];
 }

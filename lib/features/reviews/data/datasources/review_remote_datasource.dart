@@ -1,4 +1,5 @@
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/errors/exceptions.dart';
 import '../../../../core/network/api_client.dart';
 import '../models/review_model.dart';
 import '../models/review_stats_model.dart';
@@ -17,10 +18,10 @@ abstract class ReviewRemoteDataSource {
     required int calificacion,
     required String comentario,
   });
+  Future<List<ReviewModel>> getMyReviews();
   Future<void> deleteReview(String reviewId);
   Future<void> markReviewHelpful(String reviewId);
   Future<ReviewModel> replyToReview(String reviewId, String respuesta);
-  Future<List<ReviewModel>> getMyReviews();
 }
 
 class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
@@ -111,6 +112,26 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
   }
 
   @override
+  Future<List<ReviewModel>> getMyReviews() async {
+    final response = await _apiClient.get(ApiConstants.myReviews);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = response.data is List
+          ? response.data as List<dynamic>
+          : (response.data as Map<String, dynamic>)['results'] as List<dynamic>;
+
+      return data
+          .map((json) => ReviewModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } else {
+      throw ServerException(
+        'Error al obtener mis reseñas: ${response.statusMessage}',
+        response.statusCode ?? 500,
+      );
+    }
+  }
+
+  @override
   Future<void> deleteReview(String reviewId) async {
     final response = await _apiClient.delete(
       ApiConstants.reviewDetail(reviewId),
@@ -143,25 +164,6 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
       return ReviewModel.fromJson(response.data as Map<String, dynamic>);
     } else {
       throw Exception('Error al responder reseña: ${response.statusCode}');
-    }
-  }
-
-  @override  Future<List<ReviewModel>> getMyReviews() async {
-    final response = await _apiClient.get(ApiConstants.myReviews);
-
-    if (response.statusCode == 200) {
-      final responseData = response.data;
-      final List<dynamic> data;
-
-      if (responseData is Map<String, dynamic> && responseData.containsKey('results')) {
-        data = responseData['results'] as List<dynamic>;
-      } else {
-        data = responseData as List<dynamic>;
-      }
-
-      return data.map((json) => ReviewModel.fromJson(json as Map<String, dynamic>)).toList();
-    } else {
-      throw Exception('Error al obtener mis reseñas: ${response.statusCode}');
     }
   }
 }

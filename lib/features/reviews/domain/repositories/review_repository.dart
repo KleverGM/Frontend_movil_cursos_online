@@ -25,6 +25,9 @@ abstract class ReviewRepository {
     required String comentario,
   });
 
+  /// Obtener mis reseñas
+  Future<Either<Failure, List<Review>>> getMyReviews();
+
   /// Eliminar una reseña
   Future<Either<Failure, void>> deleteReview(String reviewId);
 
@@ -33,7 +36,4 @@ abstract class ReviewRepository {
 
   /// Responder a una reseña (solo instructores)
   Future<Either<Failure, Review>> replyToReview(String reviewId, String respuesta);
-
-  /// Obtener mis reseñas
-  Future<Either<Failure, List<Review>>> getMyReviews();
 }

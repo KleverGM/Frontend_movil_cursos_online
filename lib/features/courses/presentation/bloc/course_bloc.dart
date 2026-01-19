@@ -11,6 +11,7 @@ import '../../domain/usecases/get_my_courses_usecase.dart';
 import '../../domain/usecases/mark_section_completed.dart';
 import '../../domain/usecases/update_course_usecase.dart';
 import '../../domain/usecases/toggle_course_status.dart';
+import '../../domain/usecases/get_course_stats_usecase.dart';
 import 'course_event.dart';
 import 'course_state.dart';
 
@@ -28,6 +29,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
   final GetInstructorEnrollmentsUseCase _getInstructorEnrollmentsUseCase;
   final ActivateCourseUseCase _activateCourseUseCase;
   final DeactivateCourseUseCase _deactivateCourseUseCase;
+  final GetCourseStatsUseCase _getCourseStatsUseCase;
 
   CourseBloc(
     this._getCoursesUseCase,
@@ -42,6 +44,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     this._getInstructorEnrollmentsUseCase,
     this._activateCourseUseCase,
     this._deactivateCourseUseCase,
+    this._getCourseStatsUseCase,
   ) : super(const CourseInitial()) {
     on<GetCoursesEvent>(_onGetCourses);
     on<GetCourseDetailEvent>(_onGetCourseDetail);
@@ -54,6 +57,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     on<UpdateCourseEvent>(_onUpdateCourse);
     on<DeleteCourseEvent>(_onDeleteCourse);
     on<GetInstructorEnrollmentsEvent>(_onGetInstructorEnrollments);
+    on<GetCourseStatsEvent>(_onGetCourseStats);
     on<ActivateCourseEvent>(_onActivateCourse);
     on<DeactivateCourseEvent>(_onDeactivateCourse);
   }
@@ -279,6 +283,20 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     result.fold(
       (failure) => emit(CourseError(failure.message)),
       (course) => emit(CourseDeactivatedSuccess(course)),
+    );
+  }
+
+  Future<void> _onGetCourseStats(
+    GetCourseStatsEvent event,
+    Emitter<CourseState> emit,
+  ) async {
+    emit(const CourseLoading());
+
+    final result = await _getCourseStatsUseCase(event.courseId);
+
+    result.fold(
+      (failure) => emit(CourseError(failure.message)),
+      (stats) => emit(CourseStatsLoaded(stats)),
     );
   }
 }

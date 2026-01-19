@@ -1,36 +1,36 @@
 import 'package:flutter/material.dart';
-
-import '../../../courses/presentation/pages/instructor_dashboard_page.dart';
-import '../../../courses/presentation/pages/instructor_reviews_page.dart';
+import '../../../courses/presentation/pages/admin_courses_page.dart';
+import '../../../courses/presentation/pages/global_stats_page.dart';
+import 'home_page.dart';
 import 'profile_page.dart';
 
 /// InheritedWidget para compartir la función de cambio de pestaña
-class TabNavigator extends InheritedWidget {
+class AdminTabNavigator extends InheritedWidget {
   final Function(int) onTabChange;
 
-  const TabNavigator({
+  const AdminTabNavigator({
     super.key,
     required this.onTabChange,
     required super.child,
   });
 
-  static TabNavigator? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<TabNavigator>();
+  static AdminTabNavigator? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<AdminTabNavigator>();
   }
 
   @override
-  bool updateShouldNotify(TabNavigator oldWidget) => false;
+  bool updateShouldNotify(AdminTabNavigator oldWidget) => false;
 }
 
-/// Layout principal para instructores
-class InstructorMainLayout extends StatefulWidget {
-  const InstructorMainLayout({super.key});
+/// Layout principal con bottom navigation para administradores
+class AdminMainLayout extends StatefulWidget {
+  const AdminMainLayout({super.key});
 
   @override
-  State<InstructorMainLayout> createState() => InstructorMainLayoutState();
+  State<AdminMainLayout> createState() => AdminMainLayoutState();
 }
 
-class InstructorMainLayoutState extends State<InstructorMainLayout> {
+class AdminMainLayoutState extends State<AdminMainLayout> {
   int _currentIndex = 0;
 
   late final List<Widget> _pages;
@@ -39,8 +39,9 @@ class InstructorMainLayoutState extends State<InstructorMainLayout> {
   void initState() {
     super.initState();
     _pages = [
-      const InstructorDashboardPage(),
-      const InstructorReviewsPage(),
+      const HomePage(),
+      const AdminCoursesPage(),
+      const GlobalStatsPage(),
       const ProfilePage(),
     ];
   }
@@ -54,7 +55,7 @@ class InstructorMainLayoutState extends State<InstructorMainLayout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: TabNavigator(
+      body: AdminTabNavigator(
         onTabChange: changeTab,
         child: IndexedStack(
           index: _currentIndex,
@@ -69,14 +70,19 @@ class InstructorMainLayoutState extends State<InstructorMainLayout> {
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.school_outlined),
-            activeIcon: Icon(Icons.school),
-            label: 'Mis Cursos',
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: 'Inicio',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.star_outline),
-            activeIcon: Icon(Icons.star),
-            label: 'Reseñas',
+            icon: Icon(Icons.admin_panel_settings_outlined),
+            activeIcon: Icon(Icons.admin_panel_settings),
+            label: 'Cursos',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.analytics_outlined),
+            activeIcon: Icon(Icons.analytics),
+            label: 'Estadísticas',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),

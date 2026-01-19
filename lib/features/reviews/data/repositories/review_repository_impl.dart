@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/errors/exceptions.dart';
 import '../../../../core/network/network_info.dart';
 import '../../domain/entities/review.dart';
 import '../../domain/entities/review_stats.dart';
@@ -86,6 +87,19 @@ class ReviewRepositoryImpl implements ReviewRepository {
   }
 
   @override
+  Future<Either<Failure, List<Review>>> getMyReviews() async {
+    try {
+      final reviews = await _remoteDataSource.getMyReviews();
+      return Right(reviews);
+    } catch (e) {
+      if (e is ServerException) {
+        return Left(ServerFailure(message: e.message));
+      }
+      return Left(ServerFailure(message: 'Error desconocido: ${e.toString()}'));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> deleteReview(String reviewId) async {
     if (await _networkInfo.isConnected) {
       try {
@@ -119,20 +133,6 @@ class ReviewRepositoryImpl implements ReviewRepository {
       try {
         final review = await _remoteDataSource.replyToReview(reviewId, respuesta);
         return Right(review);
-      } catch (e) {
-        return Left(ServerFailure(message: e.toString()));
-      }
-    } else {
-      return const Left(NetworkFailure(message: 'No hay conexión a internet'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<Review>>> getMyReviews() async {
-    if (await _networkInfo.isConnected) {
-      try {
-        final reviews = await _remoteDataSource.getMyReviews();
-        return Right(reviews);
       } catch (e) {
         return Left(ServerFailure(message: e.toString()));
       }

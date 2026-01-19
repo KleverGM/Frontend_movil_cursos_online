@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
+import 'admin_main_layout.dart';
 import 'instructor_main_layout.dart';
 import 'main_layout.dart';
 
@@ -14,8 +15,12 @@ class AdaptiveMainLayout extends StatelessWidget {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         if (state is Authenticated) {
-          // Si es instructor o admin, mostrar layout de instructor
-          if (state.user.isInstructor || state.user.isAdmin) {
+          // Si es admin, mostrar layout de administrador
+          if (state.user.isAdmin) {
+            return const AdminMainLayout();
+          }
+          // Si es instructor, mostrar layout de instructor
+          if (state.user.isInstructor) {
             return const InstructorMainLayout();
           }
           // Si es estudiante, mostrar layout normal

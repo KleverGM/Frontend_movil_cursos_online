@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'dart:io';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_client.dart';
 import '../models/section_model.dart';
@@ -74,6 +75,34 @@ class SectionRemoteDataSourceImpl implements SectionRemoteDataSource {
     bool esPreview = false,
   }) async {
     try {
+      // Si hay archivo, usar FormData
+      if (archivoPath != null && archivoPath.isNotEmpty) {
+        final formData = FormData.fromMap({
+          'modulo': moduloId,
+          'titulo': titulo,
+          'contenido': contenido,
+          'orden': orden,
+          'duracion_minutos': duracionMinutos,
+          'es_preview': esPreview,
+          'archivo': await MultipartFile.fromFile(
+            archivoPath,
+            filename: archivoPath.split('/').last,
+          ),
+        });
+
+        if (videoUrl != null && videoUrl.isNotEmpty) {
+          formData.fields.add(MapEntry('video_url', videoUrl));
+        }
+
+        final response = await _apiClient.dio.post(
+          ApiConstants.sections,
+          data: formData,
+        );
+
+        return SectionModel.fromJson(response.data);
+      }
+
+      // Sin archivo, usar JSON normal
       final data = {
         'modulo': moduloId,
         'titulo': titulo,
@@ -85,9 +114,6 @@ class SectionRemoteDataSourceImpl implements SectionRemoteDataSource {
 
       if (videoUrl != null && videoUrl.isNotEmpty) {
         data['video_url'] = videoUrl;
-      }
-      if (archivoPath != null && archivoPath.isNotEmpty) {
-        data['archivo'] = archivoPath;
       }
 
       final response = await _apiClient.dio.post(
@@ -113,6 +139,33 @@ class SectionRemoteDataSourceImpl implements SectionRemoteDataSource {
     bool esPreview = false,
   }) async {
     try {
+      // Si hay archivo, usar FormData
+      if (archivoPath != null && archivoPath.isNotEmpty && File(archivoPath).existsSync()) {
+        final formData = FormData.fromMap({
+          'titulo': titulo,
+          'contenido': contenido,
+          'orden': orden,
+          'duracion_minutos': duracionMinutos,
+          'es_preview': esPreview,
+          'archivo': await MultipartFile.fromFile(
+            archivoPath,
+            filename: archivoPath.split('/').last,
+          ),
+        });
+
+        if (videoUrl != null && videoUrl.isNotEmpty) {
+          formData.fields.add(MapEntry('video_url', videoUrl));
+        }
+
+        final response = await _apiClient.dio.patch(
+          '${ApiConstants.sections}$sectionId/',
+          data: formData,
+        );
+
+        return SectionModel.fromJson(response.data);
+      }
+
+      // Sin archivo nuevo, usar JSON normal
       final data = <String, dynamic>{
         'titulo': titulo,
         'contenido': contenido,
@@ -123,9 +176,6 @@ class SectionRemoteDataSourceImpl implements SectionRemoteDataSource {
 
       if (videoUrl != null && videoUrl.isNotEmpty) {
         data['video_url'] = videoUrl;
-      }
-      if (archivoPath != null && archivoPath.isNotEmpty) {
-        data['archivo'] = archivoPath;
       }
 
       final response = await _apiClient.dio.patch(
