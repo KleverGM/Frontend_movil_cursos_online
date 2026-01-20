@@ -12,7 +12,6 @@ import '../widgets/dashboard_header.dart';
 import '../widgets/explore_course_card.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/progress_pie_chart.dart';
-import '../widgets/learning_streak_widget.dart';
 
 /// Página principal (Dashboard) para estudiantes
 class HomePage extends StatefulWidget {
@@ -87,6 +86,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildStats() {
+    // Calcular estadísticas reales basadas en el progreso
+    final completedCourses = enrolledCourses.where((course) => 
+      course.progreso != null && course.progreso! >= 100
+    ).length;
+    
+    final inProgressCourses = enrolledCourses.where((course) => 
+      course.progreso != null && course.progreso! > 0 && course.progreso! < 100
+    ).length;
+    
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
@@ -105,7 +113,7 @@ class _HomePageState extends State<HomePage> {
             child: StatCard(
               icon: Icons.pending_actions,
               label: 'En progreso',
-              value: enrolledCourses.length.toString(),
+              value: inProgressCourses.toString(),
               color: Colors.orange,
               onTap: () => context.push(AppRoutes.myCourses),
             ),
@@ -115,7 +123,7 @@ class _HomePageState extends State<HomePage> {
             child: StatCard(
               icon: Icons.check_circle,
               label: 'Completados',
-              value: '0',
+              value: completedCourses.toString(),
               color: Colors.green,
               onTap: () => context.push(AppRoutes.myCourses),
             ),
@@ -130,28 +138,25 @@ class _HomePageState extends State<HomePage> {
       return const SizedBox.shrink();
     }
 
-    // Calcular cursos completados, en progreso y sin iniciar
-    // Por ahora usaremos valores simulados, puedes obtenerlos del backend
-    final completedCourses = 0;
-    final inProgressCourses = enrolledCourses.length;
-    final notStartedCourses = 0;
+    // Calcular cursos completados, en progreso y sin iniciar desde el backend
+    final completedCourses = enrolledCourses.where((course) => 
+      course.progreso != null && course.progreso! >= 100
+    ).length;
+    
+    final inProgressCourses = enrolledCourses.where((course) => 
+      course.progreso != null && course.progreso! > 0 && course.progreso! < 100
+    ).length;
+    
+    final notStartedCourses = enrolledCourses.where((course) => 
+      course.progreso == null || course.progreso! == 0
+    ).length;
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          ProgressPieChart(
-            completedCourses: completedCourses,
-            inProgressCourses: inProgressCourses,
-            notStartedCourses: notStartedCourses,
-          ),
-          const SizedBox(height: 16),
-          LearningStreakWidget(
-            currentStreak: 3,
-            longestStreak: 7,
-            last7DaysActivity: [1, 1, 1, 0, 0, 0, 0],
-          ),
-        ],
+      child: ProgressPieChart(
+        completedCourses: completedCourses,
+        inProgressCourses: inProgressCourses,
+        notStartedCourses: notStartedCourses,
       ),
     );
   }

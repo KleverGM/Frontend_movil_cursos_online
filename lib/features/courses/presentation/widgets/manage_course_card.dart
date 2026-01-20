@@ -95,17 +95,17 @@ class ManageCourseCard extends StatelessWidget {
       runSpacing: 8,
       children: [
         _Badge(
-          label: course.categoria,
+          label: (course.categoria),
           icon: Icons.category,
           color: Colors.blue,
         ),
         _Badge(
-          label: course.nivel,
+          label: (course.nivel),
           icon: Icons.star,
           color: Colors.orange,
         ),
         _Badge(
-          label: '\$${course.precio.toStringAsFixed(2)}',
+          label: '\$${(course.precio).toStringAsFixed(2)}',
           icon: Icons.attach_money,
           color: Colors.green,
         ),
@@ -119,17 +119,17 @@ class ManageCourseCard extends StatelessWidget {
       children: [
         _Stat(
           icon: Icons.people,
-          value: '${course.totalEstudiantes ?? 0}',
+          value: '${course.totalEstudiantes}',
           label: 'Estudiantes',
         ),
         _Stat(
           icon: Icons.folder,
-          value: '${course.totalModulos ?? 0}',
+          value: '${course.totalModulos}',
           label: 'Módulos',
         ),
         _Stat(
           icon: Icons.article,
-          value: '${course.totalSecciones ?? 0}',
+          value: '${course.totalSecciones}',
           label: 'Secciones',
         ),
       ],
@@ -153,9 +153,9 @@ class _Badge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withOpacity( 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withOpacity( 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

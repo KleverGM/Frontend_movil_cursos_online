@@ -1,27 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/navigation/tab_navigator.dart';
 import '../../../courses/presentation/pages/courses_page.dart';
 import '../../../courses/presentation/pages/student_courses_page.dart';
 import 'home_page.dart';
 import 'profile_page.dart';
-
-/// InheritedWidget para compartir la función de cambio de pestaña
-class TabNavigator extends InheritedWidget {
-  final Function(int) onTabChange;
-
-  const TabNavigator({
-    super.key,
-    required this.onTabChange,
-    required super.child,
-  });
-
-  static TabNavigator? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<TabNavigator>();
-  }
-
-  @override
-  bool updateShouldNotify(TabNavigator oldWidget) => false;
-}
 
 /// Layout principal con bottom navigation para estudiantes
 class MainLayout extends StatefulWidget {

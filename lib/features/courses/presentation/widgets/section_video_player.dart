@@ -97,7 +97,7 @@ class _SectionVideoPlayerState extends State<SectionVideoPlayer> {
           end: Alignment.bottomCenter,
           colors: [
             Colors.transparent,
-            Colors.black.withOpacity(0.3),
+            Colors.black.withOpacity( 0.3),
           ],
         ),
       ),

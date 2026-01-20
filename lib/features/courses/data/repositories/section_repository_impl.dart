@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/network/network_info.dart';
 import '../../domain/entities/section.dart';
@@ -45,6 +46,7 @@ class SectionRepositoryImpl implements SectionRepository {
     required String titulo,
     required String contenido,
     String? videoUrl,
+    PlatformFile? videoFile,
     String? archivoPath,
     required int orden,
     required int duracionMinutos,
@@ -57,6 +59,7 @@ class SectionRepositoryImpl implements SectionRepository {
           titulo: titulo,
           contenido: contenido,
           videoUrl: videoUrl,
+          videoFile: videoFile,
           archivoPath: archivoPath,
           orden: orden,
           duracionMinutos: duracionMinutos,
@@ -77,6 +80,7 @@ class SectionRepositoryImpl implements SectionRepository {
     required String titulo,
     required String contenido,
     String? videoUrl,
+    PlatformFile? videoFile,
     String? archivoPath,
     required int orden,
     required int duracionMinutos,
@@ -89,6 +93,7 @@ class SectionRepositoryImpl implements SectionRepository {
           titulo: titulo,
           contenido: contenido,
           videoUrl: videoUrl,
+          videoFile: videoFile,
           archivoPath: archivoPath,
           orden: orden,
           duracionMinutos: duracionMinutos,

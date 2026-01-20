@@ -129,15 +129,18 @@ class _InstructorReviewsPageState extends State<InstructorReviewsPage> {
             return _buildError(state.message);
           }
 
-          if (state is ReviewsLoaded) {
-            final filteredReviews = _filterReviews(state.reviews);
+          if (state is ReviewsLoaded || state is MyReviewsLoaded) {
+            final reviews = state is MyReviewsLoaded 
+                ? state.reviews 
+                : (state as ReviewsLoaded).reviews;
+            final filteredReviews = _filterReviews(reviews);
 
             return Column(
               children: [
                 // Estadísticas
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: InstructorReviewsStats(reviews: state.reviews),
+                  child: InstructorReviewsStats(reviews: reviews),
                 ),
 
                 // Filtros

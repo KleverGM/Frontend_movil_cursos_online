@@ -1,26 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/navigation/tab_navigator.dart';
 import '../../../courses/presentation/pages/instructor_dashboard_page.dart';
 import '../../../courses/presentation/pages/instructor_reviews_page.dart';
 import 'profile_page.dart';
-
-/// InheritedWidget para compartir la función de cambio de pestaña
-class TabNavigator extends InheritedWidget {
-  final Function(int) onTabChange;
-
-  const TabNavigator({
-    super.key,
-    required this.onTabChange,
-    required super.child,
-  });
-
-  static TabNavigator? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<TabNavigator>();
-  }
-
-  @override
-  bool updateShouldNotify(TabNavigator oldWidget) => false;
-}
 
 /// Layout principal para instructores
 class InstructorMainLayout extends StatefulWidget {

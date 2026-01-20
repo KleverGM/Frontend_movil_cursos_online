@@ -37,11 +37,20 @@ class CourseInput {
       id: course.id,
       titulo: course.titulo,
       descripcion: course.descripcion,
-      categoria: course.categoria,
+      categoria: _normalizeCategoria(course.categoria),
       nivel: course.nivel,
       precio: course.precio,
       imagenUrl: course.imagen,
     );
+  }
+
+  /// Normaliza valores de categoría antiguos a los nuevos valores del backend
+  static String _normalizeCategoria(String categoria) {
+    const map = {
+      'diseno': 'diseño',
+      'desarrollo_personal': 'otros',
+    };
+    return map[categoria] ?? categoria;
   }
 
   /// Copiar con cambios

@@ -44,7 +44,7 @@ class ProgressBarWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: total > 0 ? count / total : 0,
-            backgroundColor: Colors.grey[200],
+            backgroundColor: Theme.of(context).dividerColor,
             valueColor: AlwaysStoppedAnimation<Color>(color),
             minHeight: 8,
           ),

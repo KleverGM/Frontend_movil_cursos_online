@@ -71,6 +71,26 @@ class ReviewDeleted extends ReviewState {
   List<Object> get props => [reviewId];
 }
 
+/// Mis reseñas cargadas (para instructor)
+class MyReviewsLoaded extends ReviewState {
+  final List<Review> reviews;
+
+  const MyReviewsLoaded(this.reviews);
+
+  @override
+  List<Object> get props => [reviews];
+}
+
+/// Todas las reseñas del sistema cargadas (admin)
+class AllReviewsLoaded extends ReviewState {
+  final List<Review> reviews;
+
+  const AllReviewsLoaded(this.reviews);
+
+  @override
+  List<Object> get props => [reviews];
+}
+
 /// Error
 class ReviewError extends ReviewState {
   final String message;

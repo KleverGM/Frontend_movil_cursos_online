@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/review_bloc.dart';
 import '../bloc/review_event.dart';
 import '../widgets/rating_input.dart';
@@ -54,7 +53,7 @@ class _CreateReviewDialogState extends State<CreateReviewDialog> {
                 const SizedBox(height: 8),
                 Text(
                   widget.cursoTitulo,
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
                 ),
                 const SizedBox(height: 24),
                 // Calificación

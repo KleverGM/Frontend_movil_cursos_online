@@ -310,4 +310,29 @@ class ReviewRemoteDataSourceImprovedImpl implements ReviewRemoteDataSource {
       respuestas: respuestasList,
     );
   }
+  
+  @override
+  Future<List<ReviewModel>> getAllReviews() async {
+    final response = await _apiClient.get(ApiConstants.reviews);
+
+    if (response.statusCode == 200) {
+      final responseData = response.data;
+      final List<dynamic> data;
+
+      if (responseData is Map<String, dynamic> && responseData.containsKey('results')) {
+        data = responseData['results'] as List<dynamic>;
+      } else {
+        data = responseData as List<dynamic>;
+      }
+
+      return Future.wait(
+        data.map((json) => _processReviewJson(json as Map<String, dynamic>)).toList()
+      );
+    } else {
+      throw ServerException(
+        'Error al obtener todas las reseñas: ',
+        response.statusCode ?? 500,
+      );
+    }
+  }
 }

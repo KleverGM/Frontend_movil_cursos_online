@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../domain/entities/section.dart';
 import 'video_player_dialog.dart';
+import 'youtube_webview_page.dart';
 
 /// Widget para mostrar una sección al estudiante con opción de marcar como completada
 class StudentSectionItem extends StatelessWidget {
@@ -413,7 +414,7 @@ class StudentSectionItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withOpacity( 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -513,11 +514,22 @@ class StudentSectionItem extends StatelessWidget {
             icon: const Icon(Icons.open_in_new),
             label: const Text('Abrir'),
           ),
-          // Opción de reproductor integrado solo para videos directos (no YouTube)
-          if (!isYouTube)
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.pop(dialogContext);
+          // Opción de reproductor integrado para videos directos o YouTube
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              if (isYouTube) {
+                // Usar WebView para videos de YouTube (más confiable)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => YouTubeWebViewPage(
+                      videoUrl: videoUrl,
+                    ),
+                  ),
+                );
+              } else {
+                // Usar reproductor normal para videos directos
                 showDialog(
                   context: context,
                   builder: (context) => VideoPlayerDialog(
@@ -525,14 +537,15 @@ class StudentSectionItem extends StatelessWidget {
                     title: section.titulo,
                   ),
                 );
-              },
-              icon: const Icon(Icons.play_circle_filled),
-              label: const Text('Reproducir'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
+              }
+            },
+            icon: const Icon(Icons.play_circle_filled),
+            label: const Text('Reproducir'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
             ),
+          ),
         ],
       ),
     );

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/di/injection.dart';
-import '../domain/entities/course.dart';
-import 'bloc/course_bloc.dart';
-import 'pages/course_form_page.dart';
-import 'pages/manage_courses_page.dart';
+import '../../../../core/di/injection.dart';
+import '../../domain/entities/course.dart';
+import '../bloc/course_bloc.dart';
+import '../pages/course_form_page.dart';
+import '../pages/manage_courses_page.dart';
 
 /// Utilidades de navegación para cursos
 class CourseNavigation {

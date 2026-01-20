@@ -80,20 +80,31 @@ class _RegisterPageState extends State<RegisterPage> {
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthError) {
+            // Limpiar snackbars anteriores antes de mostrar uno nuevo
+            ScaffoldMessenger.of(context).clearSnackBars();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
                 backgroundColor: Colors.red,
+                duration: const Duration(seconds: 3),
               ),
             );
           } else if (state is Authenticated) {
+            // Limpiar snackbars anteriores antes de mostrar uno nuevo
+            ScaffoldMessenger.of(context).clearSnackBars();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('¡Cuenta creada! Bienvenido ${state.user.fullName}'),
                 backgroundColor: Colors.green,
+                duration: const Duration(seconds: 2),
               ),
             );
-            context.go(AppRoutes.home);
+            // Navegar después de un pequeño delay
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                context.go(AppRoutes.home);
+              }
+            });
           }
         },
         builder: (context, state) {
@@ -128,7 +139,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     Text(
                       'Completa tus datos para registrarte',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: theme.colorScheme.onSurface.withOpacity( 0.6),
                       ),
                       textAlign: TextAlign.center,
                     ),

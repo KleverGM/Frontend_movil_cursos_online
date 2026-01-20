@@ -83,10 +83,10 @@ class ManageSectionsPage extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (state is SectionsLoaded) {
+            if (state is SectionListLoaded) {
               if (state.sections.isEmpty) {
                 return EmptySectionsWidget(
-                  onCreateSection: () => _showCreateSectionDialog(context, 1),
+                  onCreateSection: () => _showCreateSectionDialog(context, state.sections),
                 );
               }
 
@@ -115,15 +115,17 @@ class ManageSectionsPage extends StatelessWidget {
             }
 
             return EmptySectionsWidget(
-              onCreateSection: () => _showCreateSectionDialog(context, 1),
+              onCreateSection: () {
+                _showCreateSectionDialog(context, []);
+              },
             );
           },
         ),
         floatingActionButton: BlocBuilder<SectionBloc, SectionState>(
           builder: (context, state) {
-            final nextOrder = state is SectionsLoaded ? state.sections.length + 1 : 1;
+            final sections = (state is SectionListLoaded) ? state.sections : <Section>[];
             return FloatingActionButton.extended(
-              onPressed: () => _showCreateSectionDialog(context, nextOrder),
+              onPressed: () => _showCreateSectionDialog(context, sections),
               icon: const Icon(Icons.add),
               label: const Text('Nueva Sección'),
             );
@@ -133,10 +135,17 @@ class ManageSectionsPage extends StatelessWidget {
     );
   }
 
-  void _showCreateSectionDialog(BuildContext context, int orden) async {
+  void _showCreateSectionDialog(BuildContext context, List<Section> sections) async {
+    // Calcular el siguiente orden basándose en el máximo orden existente
+    int nextOrder = 1;
+    if (sections.isNotEmpty) {
+      final maxOrder = sections.map((s) => s.orden).reduce((a, b) => a > b ? a : b);
+      nextOrder = maxOrder + 1;
+    }
+    
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (dialogContext) => SectionFormDialog(orden: orden),
+      builder: (dialogContext) => SectionFormDialog(orden: nextOrder),
     );
 
     if (result != null && context.mounted) {
@@ -146,8 +155,8 @@ class ManageSectionsPage extends StatelessWidget {
               titulo: result['titulo'],
               contenido: result['contenido'],
               videoUrl: result['videoUrl'],
-              archivoPath: result['archivo']?.path, // Obtener path del File
-              orden: orden,
+              archivoPath: result['archivo']?.path,
+              orden: nextOrder,
               duracionMinutos: result['duracionMinutos'],
               esPreview: result['esPreview'],
             ),
@@ -174,6 +183,7 @@ class ManageSectionsPage extends StatelessWidget {
       context.read<SectionBloc>().add(
             UpdateSectionEvent(
               sectionId: section.id,
+              moduleId: module.id,
               titulo: result['titulo'],
               contenido: result['contenido'],
               videoUrl: result['videoUrl'],
@@ -202,7 +212,7 @@ class ManageSectionsPage extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(dialogContext);
-              context.read<SectionBloc>().add(DeleteSectionEvent(section.id));
+              context.read<SectionBloc>().add(DeleteSectionEvent(section.id, module.id));
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Eliminar'),
@@ -234,6 +244,7 @@ class ManageSectionsPage extends StatelessWidget {
         context.read<SectionBloc>().add(
               UpdateSectionEvent(
                 sectionId: updatedSections[i].id,
+                moduleId: module.id,
                 titulo: updatedSections[i].titulo,
                 contenido: updatedSections[i].contenido,
                 videoUrl: updatedSections[i].videoUrl,

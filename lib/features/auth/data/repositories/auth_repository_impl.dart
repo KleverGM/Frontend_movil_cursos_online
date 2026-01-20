@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
+import '../../../../core/error/failures.dart';
 import '../../../../core/errors/exceptions.dart';
-import '../../../../core/errors/failures.dart';
 import '../../../../core/network/network_info.dart';
 import '../../domain/entities/auth_response.dart';
 import '../../domain/entities/user.dart';
@@ -29,7 +29,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     if (!await _networkInfo.isConnected) {
-      return const Left(NetworkFailure('Sin conexión a internet'));
+      return const Left(NetworkFailure(message: 'Sin conexión a internet'));
     }
 
     try {
@@ -49,15 +49,15 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return Right(authResponse);
     } on AuthenticationException catch (e) {
-      return Left(AuthenticationFailure(e.message));
+      return Left(AuthFailure(message: e.message));
     } on ValidationException catch (e) {
-      return Left(ValidationFailure(e.message));
+      return Left(ValidationFailure(message: e.message));
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      return Left(ServerFailure(message: e.message));
     } on NetworkException catch (e) {
-      return Left(NetworkFailure(e.message));
+      return Left(NetworkFailure(message: e.message));
     } catch (e) {
-      return Left(UnknownFailure('Error desconocido: $e'));
+      return Left(UnknownFailure(message: 'Error desconocido: $e'));
     }
   }
 
@@ -71,7 +71,7 @@ class AuthRepositoryImpl implements AuthRepository {
     String? lastName,
   }) async {
     if (!await _networkInfo.isConnected) {
-      return const Left(NetworkFailure('Sin conexión a internet'));
+      return const Left(NetworkFailure(message: 'Sin conexión a internet'));
     }
 
     try {
@@ -95,15 +95,15 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return Right(authResponse);
     } on ValidationException catch (e) {
-      return Left(ValidationFailure(e.message));
+      return Left(ValidationFailure(message: e.message));
     } on ConflictException catch (e) {
-      return Left(ConflictFailure(e.message));
+      return Left(ValidationFailure(message: e.message));
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      return Left(ServerFailure(message: e.message));
     } on NetworkException catch (e) {
-      return Left(NetworkFailure(e.message));
+      return Left(NetworkFailure(message: e.message));
     } catch (e) {
-      return Left(UnknownFailure('Error desconocido: $e'));
+      return Left(UnknownFailure(message: 'Error desconocido: $e'));
     }
   }
 
@@ -118,7 +118,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
       // Si no hay caché, obtener del servidor
       if (!await _networkInfo.isConnected) {
-        return const Left(NetworkFailure('Sin conexión a internet'));
+        return const Left(NetworkFailure(message: 'Sin conexión a internet'));
       }
 
       final user = await _remoteDataSource.getCurrentUser();
@@ -126,13 +126,13 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return Right(user.toEntity());
     } on AuthenticationException catch (e) {
-      return Left(AuthenticationFailure(e.message));
+      return Left(AuthFailure(message: e.message));
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
+      return Left(ServerFailure(message: e.message));
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(UnknownFailure('Error desconocido: $e'));
+      return Left(UnknownFailure(message: 'Error desconocido: $e'));
     }
   }
 
@@ -143,9 +143,9 @@ class AuthRepositoryImpl implements AuthRepository {
       await _remoteDataSource.logout();
       return const Right(null);
     } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(UnknownFailure('Error desconocido: $e'));
+      return Left(UnknownFailure(message: 'Error desconocido: $e'));
     }
   }
 
@@ -156,6 +156,75 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(accessToken != null && accessToken.isNotEmpty);
     } catch (e) {
       return const Right(false);
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    if (await _networkInfo.isConnected) {
+      try {
+        // Obtener usuario actual para saber el ID
+        final userResult = await getCurrentUser();
+        
+        return userResult.fold(
+          (failure) => Left(failure),
+          (user) async {
+            try {
+              await _remoteDataSource.changePassword(
+                userId: user.id,
+                currentPassword: currentPassword,
+                newPassword: newPassword,
+              );
+              return const Right(null);
+            } on AuthenticationException catch (e) {
+              return Left(AuthFailure(message: e.message));
+            } on ServerException catch (e) {
+              return Left(ServerFailure(message: e.message));
+            } catch (e) {
+              return Left(ServerFailure(message: 'Error inesperado: $e'));
+            }
+          },
+        );
+      } catch (e) {
+        return Left(ServerFailure(message: 'Error inesperado: $e'));
+      }
+    } else {
+      return const Left(NetworkFailure(message: 'Sin conexión a internet'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, User>> updateProfile({
+    String? firstName,
+    String? lastName,
+    String? username,
+  }) async {
+    if (await _networkInfo.isConnected) {
+      try {
+        final updatedUser = await _remoteDataSource.updateProfile(
+          firstName: firstName,
+          lastName: lastName,
+          username: username,
+        );
+        
+        // Actualizar caché local
+        await _localDataSource.saveUser(updatedUser);
+        
+        return Right(updatedUser.toEntity());
+      } on AuthenticationException catch (e) {
+        return Left(AuthFailure(message: e.message));
+      } on ValidationException catch (e) {
+        return Left(ValidationFailure(message: e.message));
+      } on ServerException catch (e) {
+        return Left(ServerFailure(message: e.message));
+      } catch (e) {
+        return Left(ServerFailure(message: 'Error inesperado: $e'));
+      }
+    } else {
+      return Left(NetworkFailure(message: 'Sin conexión a internet'));
     }
   }
 }

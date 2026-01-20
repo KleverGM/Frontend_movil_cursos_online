@@ -170,7 +170,7 @@ class ThemeConfig {
       // Chip
       chipTheme: ChipThemeData(
         backgroundColor: Colors.grey.shade100,
-        selectedColor: primaryColor.withValues(alpha: 0.2),
+        selectedColor: primaryColor.withOpacity( 0.2),
         labelStyle: const TextStyle(color: textPrimaryLight),
         secondaryLabelStyle: const TextStyle(color: primaryColor),
         padding: const EdgeInsets.symmetric(
@@ -363,7 +363,7 @@ class ThemeConfig {
       // Chip
       chipTheme: ChipThemeData(
         backgroundColor: const Color(0xFF374151),
-        selectedColor: primaryColor.withValues(alpha: 0.3),
+        selectedColor: primaryColor.withOpacity( 0.3),
         labelStyle: const TextStyle(color: textPrimaryDark),
         secondaryLabelStyle: const TextStyle(color: primaryColor),
         padding: const EdgeInsets.symmetric(

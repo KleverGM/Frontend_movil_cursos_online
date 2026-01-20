@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/di/injection.dart';
+import '../../../../core/widgets/states/common_states.dart';
 import '../../domain/entities/course.dart';
 import '../bloc/course_bloc.dart';
+import '../bloc/course_event.dart';
+import '../bloc/course_state.dart';
 import 'course_form_page.dart';
 
 /// Página para gestionar cursos del instructor
@@ -66,72 +68,19 @@ class _ManageCoursesPageState extends State<ManageCoursesPage> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.school,
-            size: 100,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No tienes cursos creados',
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Crea tu primer curso tocando el botón +',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
-          ),
-        ],
-      ),
+    return const EmptyStateWidget(
+      icon: Icons.school,
+      title: 'No tienes cursos creados',
+      message: 'Crea tu primer curso tocando el botón +',
     );
   }
 
   Widget _buildErrorState(String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Colors.red[300],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Error al cargar cursos',
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey[700],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              context.read<CourseBloc>().add(const GetMyCoursesEvent());
-            },
-            child: const Text('Reintentar'),
-          ),
-        ],
-      ),
+    return ErrorStateWidget(
+      message: message,
+      onRetry: () {
+        context.read<CourseBloc>().add(const GetMyCoursesEvent());
+      },
     );
   }
 
@@ -287,9 +236,9 @@ class _ManageCoursesPageState extends State<ManageCoursesPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withOpacity( 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withOpacity( 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

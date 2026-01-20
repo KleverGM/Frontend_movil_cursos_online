@@ -140,4 +140,18 @@ class ReviewRepositoryImpl implements ReviewRepository {
       return const Left(NetworkFailure(message: 'No hay conexión a internet'));
     }
   }
+  
+  @override
+  Future<Either<Failure, List<Review>>> getAllReviews() async {
+    if (await _networkInfo.isConnected) {
+      try {
+        final reviews = await _remoteDataSource.getAllReviews();
+        return Right(reviews);
+      } catch (e) {
+        return Left(ServerFailure(message: e.toString()));
+      }
+    } else {
+      return const Left(NetworkFailure(message: 'No hay conexión a internet'));
+    }
+  }
 }

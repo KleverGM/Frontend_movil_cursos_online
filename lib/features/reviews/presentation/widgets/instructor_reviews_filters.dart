@@ -28,6 +28,7 @@ class InstructorReviewsFilters extends StatelessWidget {
         // Barra de búsqueda
         TextField(
           onChanged: onSearchChanged,
+          style: Theme.of(context).textTheme.bodyLarge,
           decoration: InputDecoration(
             hintText: 'Buscar por comentario, estudiante o curso...',
             prefixIcon: const Icon(Icons.search),
@@ -35,7 +36,7 @@ class InstructorReviewsFilters extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             filled: true,
-            fillColor: Colors.grey[50],
+            fillColor: Theme.of(context).cardColor,
           ),
         ),
         
@@ -48,7 +49,7 @@ class InstructorReviewsFilters extends StatelessWidget {
               'Filtrar por:',
               style: TextStyle(
                 fontWeight: FontWeight.w500,
-                color: Colors.grey[700],
+                color: Theme.of(context).textTheme.bodyMedium?.color,
               ),
             ),
             const SizedBox(width: 8),

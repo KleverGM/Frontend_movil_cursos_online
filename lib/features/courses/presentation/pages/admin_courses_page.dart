@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/di/injection.dart';
 import '../bloc/course_bloc.dart';
 import '../bloc/course_event.dart';
 import '../bloc/course_state.dart';
+import '../bloc/global_stats_bloc.dart';
 import '../widgets/admin_course_card.dart';
 import 'global_stats_page.dart';
 
@@ -14,7 +16,7 @@ class AdminCoursesPage extends StatefulWidget {
   State<AdminCoursesPage> createState() => _AdminCoursesPageState();
 }
 
-class _AdminCoursesPageState extends State<AdminCoursesPage> {
+class _AdminCoursesPageState extends State<AdminCoursesPage> with WidgetsBindingObserver {
   String _filterStatus = 'todos';
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
@@ -22,13 +24,23 @@ class _AdminCoursesPageState extends State<AdminCoursesPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadCourses();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Recargar cuando la app vuelve al frente
+      _loadCourses();
+    }
   }
 
   void _loadCourses() {
@@ -49,7 +61,9 @@ class _AdminCoursesPageState extends State<AdminCoursesPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const GlobalStatsPage(),
+                  builder: (context) => GlobalStatsPage(
+                    bloc: getIt<GlobalStatsBloc>(),
+                  ),
                 ),
               );
             },
@@ -116,9 +130,10 @@ class _AdminCoursesPageState extends State<AdminCoursesPage> {
   Widget _buildSearchBar() {
     return Container(
       padding: const EdgeInsets.all(16),
-      color: Colors.grey[100],
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: TextField(
         controller: _searchController,
+        style: Theme.of(context).textTheme.bodyLarge,
         decoration: InputDecoration(
           hintText: 'Buscar cursos...',
           prefixIcon: const Icon(Icons.search),
@@ -134,7 +149,7 @@ class _AdminCoursesPageState extends State<AdminCoursesPage> {
                 )
               : null,
           filled: true,
-          fillColor: Colors.white,
+          fillColor: Theme.of(context).cardColor,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
             borderSide: BorderSide.none,

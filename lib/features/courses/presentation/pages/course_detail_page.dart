@@ -1,9 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../domain/entities/course_detail.dart';
 import '../bloc/course_bloc.dart';
 import '../bloc/course_event.dart';
@@ -15,7 +17,7 @@ import '../widgets/course_description_section.dart';
 import '../widgets/course_reviews_section.dart';
 import '../widgets/course_modules_section.dart';
 
-/// PÃ¡gina de detalle del curso
+/// Página de detalle del curso
 class CourseDetailPage extends StatelessWidget {
   final int courseId;
 
@@ -38,7 +40,7 @@ class CourseDetailPage extends StatelessWidget {
                 backgroundColor: Colors.green,
               ),
             );
-            // Recargar detalle del curso despuÃ©s de inscribirse
+            // Recargar detalle del curso después de inscribirse
             context.read<CourseBloc>().add(GetCourseDetailEvent(courseId));
           }
         },
@@ -98,8 +100,18 @@ class CourseDetailPage extends StatelessWidget {
   }
 
   Widget _buildFloatingButton(BuildContext context, CourseDetail courseDetail) {
+    // Obtener el usuario actual del AuthBloc
+    final authState = context.read<AuthBloc>().state;
+    
+    // Si es el instructor del curso, no mostrar bot�n
+    if (authState is Authenticated && 
+        courseDetail.course.instructor != null &&
+        courseDetail.course.instructor!.id == authState.user.id) {
+      return const SizedBox.shrink(); // No mostrar bot�n
+    }
+
     if (courseDetail.inscrito) {
-      // Usuario ya inscrito - BotÃ³n para continuar
+      // Usuario ya inscrito - Botón para continuar
       return FloatingActionButton.extended(
         onPressed: () {
           context.push(
@@ -112,7 +124,7 @@ class CourseDetailPage extends StatelessWidget {
         backgroundColor: Colors.green,
       );
     } else {
-      // Usuario no inscrito - BotÃ³n para inscribirse
+      // Usuario no inscrito - Botón para inscribirse
       return FloatingActionButton.extended(
         onPressed: () => _showEnrollDialog(context, courseDetail),
         icon: const Icon(Icons.add_circle),
@@ -126,12 +138,12 @@ class CourseDetailPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Confirmar InscripciÃ³n'),
+        title: const Text('Confirmar Inscripción'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Â¿Deseas inscribirte en el curso "${courseDetail.course.titulo}"?'),
+            Text('¿Deseas inscribirte en el curso "${courseDetail.course.titulo}"?'),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -147,7 +159,7 @@ class CourseDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              '${courseDetail.course.totalModulos ?? 0} mÃ³dulos â€¢ ${courseDetail.course.totalSecciones ?? 0} secciones',
+              '${courseDetail.course.totalModulos} m�dulos � ${courseDetail.course.totalSecciones} secciones',
               style: TextStyle(color: Colors.grey[600]),
             ),
           ],
@@ -181,8 +193,6 @@ class _CourseDetailContent extends StatefulWidget {
 }
 
 class _CourseDetailContentState extends State<_CourseDetailContent> {
-  Key _reviewsKey = UniqueKey();
-
   @override
   Widget build(BuildContext context) {
     final course = widget.courseDetail.course;
@@ -231,7 +241,7 @@ class _CourseDetailContentState extends State<_CourseDetailContent> {
                         end: Alignment.bottomRight,
                         colors: [
                           Theme.of(context).primaryColor,
-                          Theme.of(context).primaryColor.withOpacity(0.7),
+                          Theme.of(context).primaryColor.withOpacity( 0.7),
                         ],
                       ),
                     ),
@@ -251,11 +261,11 @@ class _CourseDetailContentState extends State<_CourseDetailContent> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // InformaciÃ³n bÃ¡sica
+                // Información básica
                 CourseInfoSection(course: course),
                 const SizedBox(height: 24),
 
-                // DescripciÃ³n
+                // Descripción
                 CourseDescriptionSection(description: course.descripcion),
                 const SizedBox(height: 24),
 
@@ -270,25 +280,25 @@ class _CourseDetailContentState extends State<_CourseDetailContent> {
                   const SizedBox(height: 24),
                 ],
 
-                // Progreso (si estÃ¡ inscrito)
+                // Progreso (si está inscrito)
                 if (widget.courseDetail.inscrito) ...[
                   CourseProgressCard(courseDetail: widget.courseDetail),
                   const SizedBox(height: 24),
                 ],
 
-                // ReseÃ±as
+                // Reseñas
                 CourseReviewsSection(
                   courseId: course.id,
                   courseName: course.titulo,
                 ),
                 const SizedBox(height: 24),
 
-                // MÃ³dulos y Secciones
+                // Módulos y Secciones
                 CourseModulesSection(
                   modulos: widget.courseDetail.modulos,
                   inscrito: widget.courseDetail.inscrito,
                 ),
-                const SizedBox(height: 100), // Espacio para el botÃ³n flotante
+                const SizedBox(height: 100), // Espacio para el botón flotante
               ],
             ),
           ),

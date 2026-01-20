@@ -41,11 +41,11 @@ class ContinueLearningCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
-                    _buildProgressBar(),
+                    _buildProgressBar(context),
                     const SizedBox(height: 4),
                     Text(
                       '0% completado',
-                      style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                      style: TextStyle(fontSize: 11, color: Theme.of(context).textTheme.bodySmall?.color),
                     ),
                   ],
                 ),
@@ -74,20 +74,20 @@ class ContinueLearningCard extends StatelessWidget {
     return Container(
       height: 100,
       width: double.infinity,
-      color: Theme.of(context).primaryColor.withOpacity(0.1),
+      color: Theme.of(context).primaryColor.withOpacity( 0.1),
       child: Icon(
         Icons.school,
         size: 48,
-        color: Theme.of(context).primaryColor.withOpacity(0.3),
+        color: Theme.of(context).primaryColor.withOpacity( 0.3),
       ),
     );
   }
 
-  Widget _buildProgressBar() {
+  Widget _buildProgressBar(BuildContext context) {
     return LinearProgressIndicator(
       value: 0,
       minHeight: 4,
-      backgroundColor: Colors.grey[300],
+      backgroundColor: Theme.of(context).dividerColor,
     );
   }
 }

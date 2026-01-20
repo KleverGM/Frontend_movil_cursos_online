@@ -59,9 +59,11 @@ class ApiConstants {
   static String markAvisoRead(int id) => '$apiVersion/avisos/$id/marcar_leido/';
   
   // Analytics Endpoints (MongoDB)
+  static const String analytics = '$apiVersion/analytics/';
   static const String analyticsEvents = '$apiVersion/analytics/eventos/';
   static String analyticsEventDetail(String id) => '$apiVersion/analytics/eventos/$id/';
   static const String userStatisticsAnalytics = '$apiVersion/analytics/eventos/estadisticas_usuario/';
+  static const String globalStats = '$apiVersion/analytics/eventos/estadisticas_globales/';
   static const String recentEvents = '$apiVersion/analytics/eventos/eventos_recientes/';
   static const String popularCourses = '$apiVersion/analytics/eventos/cursos_populares/';
   

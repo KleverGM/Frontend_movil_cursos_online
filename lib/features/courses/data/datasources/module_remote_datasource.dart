@@ -54,20 +54,27 @@ class ModuleRemoteDataSourceImpl implements ModuleRemoteDataSource {
     String? descripcion,
     required int orden,
   }) async {
-    final response = await _apiClient.post(
-      ApiConstants.modules,
-      data: {
-        'curso': cursoId,
-        'titulo': titulo,
-        'descripcion': descripcion,
-        'orden': orden,
-      },
-    );
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.modules,
+        data: {
+          'curso': cursoId,
+          'titulo': titulo,
+          'descripcion': descripcion,
+          'orden': orden,
+        },
+      );
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return ModuleModel.fromJson(response.data as Map<String, dynamic>);
-    } else {
-      throw Exception('Error al crear módulo: ${response.statusCode}');
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return ModuleModel.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        throw Exception('Error al crear módulo: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e.toString().contains('curso') && e.toString().contains('orden')) {
+        throw Exception('Ya existe un módulo con este orden en el curso');
+      }
+      rethrow;
     }
   }
 
@@ -78,19 +85,27 @@ class ModuleRemoteDataSourceImpl implements ModuleRemoteDataSource {
     String? descripcion,
     required int orden,
   }) async {
-    final response = await _apiClient.put(
-      '${ApiConstants.modules}$moduleId/',
-      data: {
-        'titulo': titulo,
-        'descripcion': descripcion,
-        'orden': orden,
-      },
-    );
+    try {
+      final response = await _apiClient.patch(
+        '${ApiConstants.modules}$moduleId/',
+        data: {
+          'titulo': titulo,
+          'descripcion': descripcion,
+          'orden': orden,
+        },
+      );
 
-    if (response.statusCode == 200) {
-      return ModuleModel.fromJson(response.data as Map<String, dynamic>);
-    } else {
-      throw Exception('Error al actualizar módulo: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        return ModuleModel.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        throw Exception('Error al actualizar módulo: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e.toString().contains('unique') || 
+          (e.toString().contains('curso') && e.toString().contains('orden'))) {
+        throw Exception('Ya existe un módulo con orden $orden. Elige otro número.');
+      }
+      rethrow;
     }
   }
 

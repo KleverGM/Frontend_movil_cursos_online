@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/router/app_router.dart';
 import '../../domain/entities/course.dart';
+import '../../../../core/router/app_router.dart';
 
 /// Tarjeta de curso para la página de exploración
 class CourseCard extends StatelessWidget {
   final Course course;
+  final bool isGuestMode;
 
   const CourseCard({
     super.key,
     required this.course,
+    this.isGuestMode = false,
   });
 
   @override
@@ -21,7 +23,12 @@ class CourseCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         onTap: () {
-          context.push('/courses/${course.id}');
+          // Navegar a la ruta correcta según el modo
+          if (isGuestMode) {
+            context.push(AppRoutes.guestCourseDetail(course.id));
+          } else {
+            context.push(AppRoutes.courseDetail(course.id));
+          }
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(

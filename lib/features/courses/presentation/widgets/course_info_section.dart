@@ -33,7 +33,7 @@ class CourseInfoSection extends StatelessWidget {
                 ),
                 InfoChip(
                   icon: Icons.people,
-                  label: '${course.totalEstudiantes ?? 0}',
+                  label: '${course.totalEstudiantes}',
                   color: Colors.green,
                 ),
               ],

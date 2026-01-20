@@ -1,26 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../core/widgets/navigation/tab_navigator.dart';
+import '../../../admin/presentation/pages/admin_dashboard_page.dart';
 import '../../../courses/presentation/pages/admin_courses_page.dart';
 import '../../../courses/presentation/pages/global_stats_page.dart';
-import 'home_page.dart';
+import '../../../courses/presentation/bloc/global_stats_bloc.dart';
 import 'profile_page.dart';
-
-/// InheritedWidget para compartir la función de cambio de pestaña
-class AdminTabNavigator extends InheritedWidget {
-  final Function(int) onTabChange;
-
-  const AdminTabNavigator({
-    super.key,
-    required this.onTabChange,
-    required super.child,
-  });
-
-  static AdminTabNavigator? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<AdminTabNavigator>();
-  }
-
-  @override
-  bool updateShouldNotify(AdminTabNavigator oldWidget) => false;
-}
 
 /// Layout principal con bottom navigation para administradores
 class AdminMainLayout extends StatefulWidget {
@@ -32,34 +17,37 @@ class AdminMainLayout extends StatefulWidget {
 
 class AdminMainLayoutState extends State<AdminMainLayout> {
   int _currentIndex = 0;
+  int _coursesPageVersion = 0; // Para forzar la reconstrucción
 
-  late final List<Widget> _pages;
-
-  @override
-  void initState() {
-    super.initState();
-    _pages = [
-      const HomePage(),
-      const AdminCoursesPage(),
-      const GlobalStatsPage(),
+  List<Widget> _buildPages() {
+    return [
+      const AdminDashboardPage(),
+      AdminCoursesPage(key: ValueKey('courses_$_coursesPageVersion')),
+      GlobalStatsPage(bloc: getIt<GlobalStatsBloc>()),
       const ProfilePage(),
     ];
   }
 
   void changeTab(int index) {
     setState(() {
+      // Si cambiamos a la pestaña de cursos (index 1), incrementar la versión para recrearla
+      if (index == 1 && index != _currentIndex) {
+        _coursesPageVersion++;
+      }
       _currentIndex = index;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final pages = _buildPages();
+    
     return Scaffold(
-      body: AdminTabNavigator(
+      body: TabNavigator(
         onTabChange: changeTab,
         child: IndexedStack(
           index: _currentIndex,
-          children: _pages,
+          children: pages,
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(

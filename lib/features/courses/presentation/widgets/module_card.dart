@@ -22,12 +22,11 @@ class _ModuleCardState extends State<ModuleCard> {
 
   @override
   Widget build(BuildContext context) {
-    final totalSecciones = widget.modulo.secciones?.length ?? 0;
-    final duracionTotal = widget.modulo.secciones?.fold<int>(
+    final totalSecciones = widget.modulo.secciones.length;
+    final duracionTotal = widget.modulo.secciones.fold<int>(
           0,
-          (sum, seccion) => sum + (seccion.duracionMinutos ?? 0),
-        ) ??
-        0;
+          (sum, seccion) => sum + seccion.duracionMinutos,
+        );
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -61,9 +60,9 @@ class _ModuleCardState extends State<ModuleCard> {
               _isExpanded ? Icons.expand_less : Icons.expand_more,
             ),
           ),
-          if (_isExpanded && widget.modulo.secciones != null) ...[
+          if (_isExpanded && widget.modulo.secciones.isNotEmpty) ...[
             const Divider(height: 1),
-            ...widget.modulo.secciones!.map(
+            ...widget.modulo.secciones.map(
               (seccion) => ListTile(
                 leading: Icon(
                   seccion.videoUrl != null
@@ -72,7 +71,7 @@ class _ModuleCardState extends State<ModuleCard> {
                   color: Colors.grey[600],
                 ),
                 title: Text(seccion.titulo),
-                subtitle: Text('${seccion.duracionMinutos ?? 0} min'),
+                subtitle: Text('${seccion.duracionMinutos} min'),
                 trailing: seccion.esPreview == true
                     ? Chip(
                         label: const Text(

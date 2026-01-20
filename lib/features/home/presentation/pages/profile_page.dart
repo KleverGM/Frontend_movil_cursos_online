@@ -8,6 +8,8 @@ import '../../../../core/widgets/cards/info_tile.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
+import 'edit_profile_page.dart';
+import 'settings_page.dart';
 
 /// Página de perfil del usuario
 class ProfilePage extends StatelessWidget {
@@ -57,7 +59,7 @@ class ProfilePage extends StatelessWidget {
                     user.email,
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.grey[600],
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -102,14 +104,19 @@ class ProfilePage extends StatelessWidget {
                     title: 'Opciones',
                     children: [
                       ListTile(
+                        leading: const Icon(Icons.lock_reset),
+                        title: const Text('Cambiar Contraseña'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => _showChangePasswordDialog(context),
+                      ),
+                      ListTile(
                         leading: const Icon(Icons.edit),
                         title: const Text('Editar Perfil'),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
-                          // TODO: Implementar edición de perfil
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Función en desarrollo'),
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const EditProfilePage(),
                             ),
                           );
                         },
@@ -119,10 +126,9 @@ class ProfilePage extends StatelessWidget {
                         title: const Text('Configuración'),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
-                          // TODO: Implementar configuración
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Función en desarrollo'),
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const SettingsPage(),
                             ),
                           );
                         },
@@ -188,6 +194,141 @@ class ProfilePage extends StatelessWidget {
       'Dic'
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
+  void _showChangePasswordDialog(BuildContext context) {
+    final currentPasswordController = TextEditingController();
+    final newPasswordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+    bool obscureCurrent = true;
+    bool obscureNew = true;
+    bool obscureConfirm = true;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is PasswordChanged) {
+              Navigator.pop(dialogContext);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            } else if (state is AuthError) {
+              Navigator.pop(dialogContext);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+          child: AlertDialog(
+            title: const Text('Cambiar Contraseña'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: currentPasswordController,
+                    obscureText: obscureCurrent,
+                    decoration: InputDecoration(
+                      labelText: 'Contraseña Actual',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(obscureCurrent ? Icons.visibility : Icons.visibility_off),
+                        onPressed: () => setState(() => obscureCurrent = !obscureCurrent),
+                      ),
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: newPasswordController,
+                    obscureText: obscureNew,
+                    decoration: InputDecoration(
+                      labelText: 'Nueva Contraseña',
+                      prefixIcon: const Icon(Icons.lock),
+                      suffixIcon: IconButton(
+                        icon: Icon(obscureNew ? Icons.visibility : Icons.visibility_off),
+                        onPressed: () => setState(() => obscureNew = !obscureNew),
+                      ),
+                      border: const OutlineInputBorder(),
+                      hintText: 'Mínimo 8 caracteres',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: confirmPasswordController,
+                    obscureText: obscureConfirm,
+                    decoration: InputDecoration(
+                      labelText: 'Confirmar Nueva Contraseña',
+                      prefixIcon: const Icon(Icons.lock_reset),
+                      suffixIcon: IconButton(
+                        icon: Icon(obscureConfirm ? Icons.visibility : Icons.visibility_off),
+                        onPressed: () => setState(() => obscureConfirm = !obscureConfirm),
+                      ),
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  final currentPassword = currentPasswordController.text;
+                  final newPassword = newPasswordController.text;
+                  final confirmPassword = confirmPasswordController.text;
+
+                  if (currentPassword.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Ingrese su contraseña actual')),
+                    );
+                    return;
+                  }
+
+                  if (newPassword.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Ingrese la nueva contraseña')),
+                    );
+                    return;
+                  }
+
+                  if (newPassword.length < 8) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('La contraseña debe tener al menos 8 caracteres')),
+                    );
+                    return;
+                  }
+
+                  if (newPassword != confirmPassword) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Las contraseñas no coinciden')),
+                    );
+                    return;
+                  }
+
+                  context.read<AuthBloc>().add(ChangePasswordRequested(
+                        currentPassword: currentPassword,
+                        newPassword: newPassword,
+                      ));
+                },
+                child: const Text('Cambiar Contraseña'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _showLogoutDialog(BuildContext context) {

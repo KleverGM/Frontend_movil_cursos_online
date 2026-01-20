@@ -80,7 +80,7 @@ class StudentStatsCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _buildProgressSummary(stats),
+            _buildProgressSummary(context, stats),
           ],
         ),
       ),
@@ -97,7 +97,7 @@ class StudentStatsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withOpacity( 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -124,13 +124,13 @@ class StudentStatsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressSummary(Map<String, dynamic> stats) {
+  Widget _buildProgressSummary(BuildContext context, Map<String, dynamic> stats) {
     final promedioProgreso = stats['promedioProgreso'] as double;
     
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.purple.withOpacity(0.1),
+        color: Colors.purple.withOpacity( 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -162,7 +162,7 @@ class StudentStatsCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: promedioProgreso / 100,
               minHeight: 8,
-              backgroundColor: Colors.grey[300],
+              backgroundColor: Theme.of(context).dividerColor,
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.purple),
             ),
           ),

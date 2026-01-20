@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../core/widgets/states/common_states.dart';
+import '../../../../core/widgets/filters/filter_widgets.dart';
 import '../bloc/course_bloc.dart';
 import '../bloc/course_event.dart';
 import '../bloc/course_state.dart';
 import '../widgets/student_course_card.dart';
+import 'courses_page.dart';
 
 /// Página que muestra los cursos inscritos del estudiante
 class StudentCoursesPage extends StatefulWidget {
@@ -17,47 +21,48 @@ class _StudentCoursesPageState extends State<StudentCoursesPage> {
   String _filterStatus = 'todos';
 
   @override
-  void initState() {
-    super.initState();
-    _loadCourses();
-  }
-
-  void _loadCourses() {
-    context.read<CourseBloc>().add(const GetEnrolledCoursesEvent());
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mis Cursos'),
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadCourses,
-            tooltip: 'Actualizar',
-          ),
-        ],
-      ),
-      body: BlocBuilder<CourseBloc, CourseState>(
-        builder: (context, state) {
+    return BlocProvider(
+      create: (context) => getIt<CourseBloc>()..add(const GetEnrolledCoursesEvent()),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Mis Cursos'),
+          elevation: 0,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                context.read<CourseBloc>().add(const GetEnrolledCoursesEvent());
+              },
+              tooltip: 'Actualizar',
+            ),
+          ],
+        ),
+        body: BlocBuilder<CourseBloc, CourseState>(
+          builder: (context, state) {
+            print('🎨 UI: BlocBuilder construyendo con estado: ${state.runtimeType}');
+          
           if (state is CourseLoading) {
+            print('🎨 UI: Mostrando loading');
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
 
           if (state is CourseError) {
+            print('🎨 UI: Mostrando error: ${state.message}');
             return _buildError(state.message);
           }
 
           if (state is EnrolledCoursesLoaded) {
+            print('📚 EnrolledCoursesLoaded - Total cursos: ${state.courses.length}');
+            
             if (state.courses.isEmpty) {
               return _buildEmptyState();
             }
 
             final filteredCourses = _filterCourses(state.courses);
+            print('📚 Cursos filtrados: ${filteredCourses.length}');
 
             return Column(
               children: [
@@ -65,7 +70,8 @@ class _StudentCoursesPageState extends State<StudentCoursesPage> {
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: () async {
-                      _loadCourses();
+                      context.read<CourseBloc>().add(const GetEnrolledCoursesEvent());
+                      await Future.delayed(const Duration(milliseconds: 500));
                     },
                     child: filteredCourses.isEmpty
                         ? _buildEmptyFilterState()
@@ -73,6 +79,7 @@ class _StudentCoursesPageState extends State<StudentCoursesPage> {
                             padding: const EdgeInsets.all(16),
                             itemCount: filteredCourses.length,
                             itemBuilder: (context, index) {
+                              print('📚 Renderizando curso $index: ${filteredCourses[index].titulo}');
                               return StudentCourseCard(
                                 course: filteredCourses[index],
                               );
@@ -84,10 +91,12 @@ class _StudentCoursesPageState extends State<StudentCoursesPage> {
             );
           }
 
+          print('⚠️ UI: Estado no manejado: ${state.runtimeType}');
           return const Center(
             child: Text('Carga tus cursos inscritos'),
           );
         },
+      ),
       ),
     );
   }
@@ -100,44 +109,35 @@ class _StudentCoursesPageState extends State<StudentCoursesPage> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            _buildFilterChip('todos', 'Todos', Icons.list),
+            FilterChipWidget(
+              label: 'Todos',
+              isSelected: _filterStatus == 'todos',
+              onTap: () => setState(() => _filterStatus = 'todos'),
+              icon: Icons.list,
+            ),
             const SizedBox(width: 8),
-            _buildFilterChip('en_progreso', 'En Progreso', Icons.play_circle),
+            FilterChipWidget(
+              label: 'En Progreso',
+              isSelected: _filterStatus == 'en_progreso',
+              onTap: () => setState(() => _filterStatus = 'en_progreso'),
+              icon: Icons.play_circle,
+            ),
             const SizedBox(width: 8),
-            _buildFilterChip('completados', 'Completados', Icons.check_circle),
+            FilterChipWidget(
+              label: 'Completados',
+              isSelected: _filterStatus == 'completados',
+              onTap: () => setState(() => _filterStatus = 'completados'),
+              icon: Icons.check_circle,
+            ),
             const SizedBox(width: 8),
-            _buildFilterChip('no_iniciado', 'No Iniciados', Icons.schedule),
+            FilterChipWidget(
+              label: 'No Iniciados',
+              isSelected: _filterStatus == 'no_iniciado',
+              onTap: () => setState(() => _filterStatus = 'no_iniciado'),
+              icon: Icons.schedule,
+            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(String value, String label, IconData icon) {
-    final isSelected = _filterStatus == value;
-    return FilterChip(
-      selected: isSelected,
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 16,
-            color: isSelected ? Colors.white : Colors.grey[700],
-          ),
-          const SizedBox(width: 4),
-          Text(label),
-        ],
-      ),
-      onSelected: (selected) {
-        setState(() {
-          _filterStatus = value;
-        });
-      },
-      selectedColor: Theme.of(context).primaryColor,
-      labelStyle: TextStyle(
-        color: isSelected ? Colors.white : Colors.grey[700],
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
     );
   }
@@ -161,126 +161,49 @@ class _StudentCoursesPageState extends State<StudentCoursesPage> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.school_outlined,
-              size: 120,
-              color: Colors.grey[300],
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'No tienes cursos inscritos',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[700],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Explora nuestro catálogo y encuentra cursos que te interesen',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () {
-                // TODO: Navegar a catálogo de cursos
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Catálogo de cursos próximamente'),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.explore),
-              label: const Text('Explorar Cursos'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
-                ),
+    return EmptyStateWidget(
+      icon: Icons.school_outlined,
+      title: 'No tienes cursos inscritos',
+      message: 'Explora nuestro catálogo y encuentra cursos que te interesen',
+      action: ElevatedButton.icon(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BlocProvider(
+                create: (context) => getIt<CourseBloc>()
+                  ..add(const GetCoursesEvent()),
+                child: const CoursesPage(),
               ),
             ),
-          ],
+          );
+        },
+        icon: const Icon(Icons.explore),
+        label: const Text('Explorar Cursos'),
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 32,
+            vertical: 16,
+          ),
         ),
       ),
     );
   }
 
   Widget _buildEmptyFilterState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.filter_list_off,
-              size: 80,
-              color: Colors.grey[300],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No hay cursos con este filtro',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+    return EmptyStateWidget(
+      icon: Icons.filter_list_off,
+      title: 'No hay cursos con este filtro',
+      message: 'Intenta con otros filtros',
     );
   }
 
   Widget _buildError(String message) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Error al cargar cursos',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: _loadCourses,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Reintentar'),
-            ),
-          ],
-        ),
-      ),
+    return ErrorStateWidget(
+      message: message,
+      onRetry: () {
+        context.read<CourseBloc>().add(const GetEnrolledCoursesEvent());
+      },
     );
   }
 }

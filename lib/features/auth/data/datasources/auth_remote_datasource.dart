@@ -24,6 +24,18 @@ abstract class AuthRemoteDataSource {
   Future<UserModel> getCurrentUser();
 
   Future<void> logout();
+
+  Future<void> changePassword({
+    required int userId,
+    required String currentPassword,
+    required String newPassword,
+  });
+
+  Future<UserModel> updateProfile({
+    String? firstName,
+    String? lastName,
+    String? username,
+  });
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -152,5 +164,89 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     // El logout es principalmente local (eliminar tokens)
     // Si tu backend tiene endpoint de logout, se puede implementar aquí
     return;
+  }
+
+  @override
+  Future<void> changePassword({
+    required int userId,
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await _apiClient.post(
+        '${ApiConstants.users}$userId/cambiar_password/',
+        data: {
+          'current_password': currentPassword,
+          'new_password': newPassword,
+        },
+      );
+
+      if (response.statusCode != 200) {
+        throw ServerException(
+          'Error al cambiar contraseña',
+          response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw const AuthenticationException('No autenticado');
+      }
+      if (e.response?.statusCode == 400) {
+        final errorMsg = e.response?.data['error'] ?? 'Contraseña actual incorrecta';
+        throw ServerException(errorMsg, 400);
+      }
+      throw ServerException(
+        e.message ?? 'Error de conexión',
+        e.response?.statusCode,
+      );
+    }
+  }
+
+  @override
+  Future<UserModel> updateProfile({
+    String? firstName,
+    String? lastName,
+    String? username,
+  }) async {
+    try {
+      // Construir el body solo con los campos proporcionados
+      final Map<String, dynamic> data = {};
+      if (firstName != null) data['first_name'] = firstName;
+      if (lastName != null) data['last_name'] = lastName;
+      if (username != null) data['username'] = username;
+
+      final response = await _apiClient.get(ApiConstants.userProfile);
+      final userId = response.data['id'];
+
+      final updateResponse = await _apiClient.patch(
+        '${ApiConstants.users}$userId/',
+        data: data,
+      );
+
+      return UserModel.fromJson(updateResponse.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw const AuthenticationException('No autenticado');
+      }
+      if (e.response?.statusCode == 400) {
+        final errors = e.response?.data;
+        String errorMsg = 'Error de validación';
+        
+        if (errors is Map) {
+          if (errors.containsKey('username')) {
+            errorMsg = errors['username'][0];
+          } else if (errors.containsKey('email')) {
+            errorMsg = errors['email'][0];
+          } else {
+            errorMsg = errors.values.first.toString();
+          }
+        }
+        throw ValidationException(errorMsg);
+      }
+      throw ServerException(
+        e.message ?? 'Error de conexión',
+        e.response?.statusCode,
+      );
+    }
   }
 }

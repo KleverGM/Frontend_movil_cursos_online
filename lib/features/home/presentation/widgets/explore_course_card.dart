@@ -54,13 +54,13 @@ class ExploreCourseCard extends StatelessWidget {
       width: 80,
       height: 80,
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.1),
+        color: Theme.of(context).primaryColor.withOpacity( 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Icon(
         Icons.school,
         size: 40,
-        color: Theme.of(context).primaryColor.withOpacity(0.3),
+        color: Theme.of(context).primaryColor.withOpacity( 0.3),
       ),
     );
   }
@@ -82,7 +82,7 @@ class ExploreCourseCard extends StatelessWidget {
         if (course.instructor != null)
           Text(
             course.instructor!.username,
-            style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 13, color: Theme.of(context).textTheme.bodySmall?.color),
           ),
         const SizedBox(height: 8),
         Row(

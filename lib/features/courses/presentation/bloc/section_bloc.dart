@@ -53,6 +53,7 @@ class SectionBloc extends Bloc<SectionEvent, SectionState> {
       titulo: event.titulo,
       contenido: event.contenido,
       videoUrl: event.videoUrl,
+      videoFile: event.videoFile,
       archivoPath: event.archivoPath,
       orden: event.orden,
       duracionMinutos: event.duracionMinutos,
@@ -61,7 +62,11 @@ class SectionBloc extends Bloc<SectionEvent, SectionState> {
 
     result.fold(
       (failure) => emit(SectionError(failure.message)),
-      (section) => emit(SectionCreated(section)),
+      (section) {
+        emit(SectionCreated(section));
+        // Recargar la lista de secciones después de crear
+        add(GetSectionsByModuleEvent(event.moduloId));
+      },
     );
   }
 
@@ -76,6 +81,7 @@ class SectionBloc extends Bloc<SectionEvent, SectionState> {
       titulo: event.titulo,
       contenido: event.contenido,
       videoUrl: event.videoUrl,
+      videoFile: event.videoFile,
       archivoPath: event.archivoPath,
       orden: event.orden,
       duracionMinutos: event.duracionMinutos,
@@ -84,7 +90,11 @@ class SectionBloc extends Bloc<SectionEvent, SectionState> {
 
     result.fold(
       (failure) => emit(SectionError(failure.message)),
-      (section) => emit(SectionUpdated(section)),
+      (section) {
+        emit(SectionUpdated(section));
+        // Recargar la lista de secciones después de actualizar
+        add(GetSectionsByModuleEvent(event.moduleId));
+      },
     );
   }
 
@@ -98,7 +108,11 @@ class SectionBloc extends Bloc<SectionEvent, SectionState> {
 
     result.fold(
       (failure) => emit(SectionError(failure.message)),
-      (_) => emit(const SectionDeleted()),
+      (_) {
+        emit(const SectionDeleted());
+        // Recargar la lista de secciones después de eliminar
+        add(GetSectionsByModuleEvent(event.moduleId));
+      },
     );
   }
 
@@ -106,6 +120,8 @@ class SectionBloc extends Bloc<SectionEvent, SectionState> {
     MarkSectionCompletedEvent event,
     Emitter<SectionState> emit,
   ) async {
+    emit(const SectionLoading());
+
     final result = await _markSectionCompleted(
       MarkSectionParams(sectionId: event.sectionId),
     );

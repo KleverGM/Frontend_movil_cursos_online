@@ -35,7 +35,7 @@ class ReviewCard extends StatelessWidget {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                  backgroundColor: Theme.of(context).primaryColor.withOpacity( 0.1),
                   child: Text(
                     review.estudianteNombre[0].toUpperCase(),
                     style: TextStyle(
@@ -67,7 +67,7 @@ class ReviewCard extends StatelessWidget {
                             _formatDate(review.fechaCreacion),
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[600],
+                              color: Theme.of(context).textTheme.bodySmall?.color,
                             ),
                           ),
                         ],
@@ -95,7 +95,7 @@ class ReviewCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Colors.blue.withOpacity( 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(

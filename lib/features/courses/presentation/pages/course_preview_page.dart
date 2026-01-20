@@ -210,7 +210,7 @@ class _CoursePreviewContent extends StatelessWidget {
   }
 
   int _totalSections(List<Module> modules) {
-    return modules.fold(0, (sum, module) => sum + (module.totalSecciones ?? 0));
+    return modules.fold(0, (sum, module) => sum + module.totalSecciones);
   }
 }
 
@@ -230,7 +230,6 @@ class _ModulePreviewCard extends StatefulWidget {
 class _ModulePreviewCardState extends State<_ModulePreviewCard> {
   bool _isExpanded = false;
   List<Section>? _sections;
-  bool _isLoadingSections = false;
   String? _error;
 
   @override
@@ -247,7 +246,6 @@ class _ModulePreviewCardState extends State<_ModulePreviewCard> {
     if (_sections != null) return; // Ya cargadas
 
     setState(() {
-      _isLoadingSections = true;
       _error = null;
     });
 
@@ -263,12 +261,10 @@ class _ModulePreviewCardState extends State<_ModulePreviewCard> {
         if (state is SectionsLoaded) {
           setState(() {
             _sections = state.sections;
-            _isLoadingSections = false;
           });
         } else if (state is SectionError) {
           setState(() {
             _error = state.message;
-            _isLoadingSections = false;
           });
         }
       },
@@ -302,7 +298,7 @@ class _ModulePreviewCardState extends State<_ModulePreviewCard> {
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                '${widget.module.totalSecciones ?? 0} lección${widget.module.totalSecciones != 1 ? 'es' : ''}',
+                '${widget.module.totalSecciones} lección${widget.module.totalSecciones != 1 ? 'es' : ''}',
                 style: TextStyle(color: Colors.grey[600], fontSize: 13),
               ),
             ),
@@ -311,12 +307,12 @@ class _ModulePreviewCardState extends State<_ModulePreviewCard> {
               setState(() {
                 _isExpanded = expanded;
               });
-              if (expanded && _sections == null && !_isLoadingSections) {
+              if (expanded && _sections == null) {
                 _loadSections();
               }
             },
             children: [
-              if (_isLoadingSections)
+              if (_sections == null && _error == null)
                 const Padding(
                   padding: EdgeInsets.all(16),
                   child: Center(child: CircularProgressIndicator()),

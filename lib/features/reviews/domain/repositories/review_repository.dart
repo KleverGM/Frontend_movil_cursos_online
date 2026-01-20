@@ -36,4 +36,9 @@ abstract class ReviewRepository {
 
   /// Responder a una reseña (solo instructores)
   Future<Either<Failure, Review>> replyToReview(String reviewId, String respuesta);
+  
+  // ============ MÉTODOS DE ADMINISTRACIÓN ============
+  
+  /// Obtener todas las reseñas del sistema (solo admin)
+  Future<Either<Failure, List<Review>>> getAllReviews();
 }

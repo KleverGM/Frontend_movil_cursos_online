@@ -147,7 +147,7 @@ class StudentCourseCard extends StatelessWidget {
                         child: LinearProgressIndicator(
                           value: progreso / 100,
                           minHeight: 8,
-                          backgroundColor: Colors.grey[200],
+                          backgroundColor: Theme.of(context).dividerColor,
                           valueColor: AlwaysStoppedAnimation<Color>(
                             _getProgressColor(progreso),
                           ),
@@ -237,7 +237,7 @@ class StudentCourseCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withOpacity( 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(

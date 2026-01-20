@@ -29,7 +29,7 @@ class InstructorReviewCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
-                  backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                  backgroundColor: Theme.of(context).primaryColor.withOpacity( 0.1),
                   child: Text(
                     review.estudianteNombre[0].toUpperCase(),
                     style: TextStyle(
@@ -66,15 +66,15 @@ class InstructorReviewCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.blue[50],
+                          color: Theme.of(context).primaryColor.withOpacity( 0.1),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.blue[200]!),
+                          border: Border.all(color: Theme.of(context).primaryColor.withOpacity( 0.3)),
                         ),
                         child: Text(
                           review.cursoTitulo,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.blue[700],
+                            color: Theme.of(context).primaryColor,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -87,7 +87,7 @@ class InstructorReviewCard extends StatelessWidget {
                         DateFormat('dd/MM/yyyy').format(review.fechaCreacion),
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey[600],
+                          color: Theme.of(context).textTheme.bodySmall?.color,
                         ),
                       ),
                     ],
@@ -111,9 +111,9 @@ class InstructorReviewCard extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.green[50],
+                  color: Colors.green.withOpacity( 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.green[200]!),
+                  border: Border.all(color: Colors.green.withOpacity( 0.3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,7 +147,7 @@ class InstructorReviewCard extends StatelessWidget {
                         DateFormat('dd/MM/yyyy').format(review.fechaRespuesta!),
                         style: TextStyle(
                           fontSize: 10,
-                          color: Colors.grey[600],
+                          color: Theme.of(context).textTheme.bodySmall?.color,
                         ),
                       ),
                     ],
@@ -165,9 +165,9 @@ class InstructorReviewCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.orange[50],
+                      color: Colors.orange.withOpacity( 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.orange[300]!),
+                      border: Border.all(color: Colors.orange.withOpacity( 0.3)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,

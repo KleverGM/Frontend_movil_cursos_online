@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
-import '../../../../core/router/app_router.dart';
-import '../../../../core/widgets/states/empty_state_widget.dart';
-import '../../../../core/widgets/states/error_state_widget.dart';
-import '../../../home/presentation/pages/main_layout.dart';
+import '../../../../core/widgets/states/common_states.dart';
+import '../../../../core/widgets/filters/filter_widgets.dart';
+import '../../../../core/widgets/navigation/tab_navigator.dart';
 import '../../domain/entities/course.dart';
 import '../bloc/course_bloc.dart';
 import '../bloc/course_event.dart';
@@ -133,25 +131,15 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
     required IconData icon,
   }) {
     final isSelected = _selectedFilter == value;
-    return FilterChip(
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 18),
-          const SizedBox(width: 4),
-          Text(label),
-        ],
-      ),
-      selected: isSelected,
-      onSelected: (selected) {
-        if (selected) {
-          setState(() {
-            _selectedFilter = value;
-          });
-        }
+    return FilterChipWidget(
+      label: label,
+      isSelected: isSelected,
+      icon: icon,
+      onTap: () {
+        setState(() {
+          _selectedFilter = value;
+        });
       },
-      selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
-      checkmarkColor: Theme.of(context).primaryColor,
     );
   }
 
@@ -166,41 +154,22 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
       icon: Icons.school_outlined,
       title: 'Aún no tienes cursos',
       message: 'Explora nuestro catálogo y comienza a aprender',
-      buttonText: 'Explorar Cursos',
-      onButtonPressed: () {
-        // Cambiar a la pestaña "Explorar" (index 1)
-        final tabNavigator = TabNavigator.of(context);
-        if (tabNavigator != null) {
-          tabNavigator.onTabChange(1);
-        }
-      },
+      action: ElevatedButton(
+        onPressed: () {
+          // Cambiar a la pestaña "Explorar" (index 1)
+          final tabNavigator = TabNavigator.of(context);
+          if (tabNavigator != null) {
+            tabNavigator.onTabChange(1);
+          }
+        },
+        child: const Text('Explorar Cursos'),
+      ),
     );
   }
 
   Widget _buildNoResultsState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.search_off,
-              size: 80,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No hay cursos en esta categoría',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+    return const NoResultsWidget(
+      query: 'No hay cursos en esta categoría',
     );
   }
 }

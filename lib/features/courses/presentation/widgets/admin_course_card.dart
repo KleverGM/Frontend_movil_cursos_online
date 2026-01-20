@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/course.dart';
-import '../pages/student_course_viewer_page.dart';
+import '../pages/admin_course_viewer_page.dart';
 import '../pages/course_stats_page.dart';
 
 /// Tarjeta de curso para vista de administrador
@@ -56,8 +56,8 @@ class AdminCourseCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: course.activo
-                          ? Colors.green.withOpacity(0.9)
-                          : Colors.red.withOpacity(0.9),
+                          ? Colors.green.withOpacity( 0.9)
+                          : Colors.red.withOpacity( 0.9),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -92,7 +92,7 @@ class AdminCourseCard extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: _getNivelColor().withOpacity(0.9),
+                      color: _getNivelColor().withOpacity( 0.9),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -157,18 +157,18 @@ class AdminCourseCard extends StatelessWidget {
                   children: [
                     _buildStatChip(
                       Icons.people,
-                      '${course.totalEstudiantes ?? 0}',
+                      '${course.totalEstudiantes}',
                       Colors.blue,
                     ),
                     _buildStatChip(
                       Icons.star,
-                      course.calificacionPromedio.toStringAsFixed(1),
+                      (course.calificacionPromedio).toStringAsFixed(1),
                       Colors.amber,
                     ),
                     _buildStatChip(
                       Icons.attach_money,
-                      course.precio > 0
-                          ? '\$${course.precio.toStringAsFixed(0)}'
+                      (course.precio) > 0
+                          ? '\$${(course.precio).toStringAsFixed(0)}'
                           : 'Gratis',
                       Colors.green,
                     ),
@@ -185,14 +185,16 @@ class AdminCourseCard extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => StudentCourseViewerPage(
+                              builder: (context) => AdminCourseViewerPage(
                                 courseId: course.id,
                               ),
                             ),
-                          );
+                          ).then((_) {
+                            onCourseUpdated();
+                          });
                         },
-                        icon: const Icon(Icons.remove_red_eye, size: 18),
-                        label: const Text('Ver Contenido'),
+                        icon: const Icon(Icons.settings, size: 18),
+                        label: const Text('Gestionar'),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
@@ -253,7 +255,7 @@ class AdminCourseCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withOpacity( 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(

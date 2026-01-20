@@ -85,3 +85,11 @@ class GetMyReviewsEvent extends ReviewEvent {
   @override
   List<Object> get props => [];
 }
+
+/// Obtener todas las reseñas del sistema (admin)
+class GetAllReviewsEvent extends ReviewEvent {
+  const GetAllReviewsEvent();
+
+  @override
+  List<Object> get props => [];
+}

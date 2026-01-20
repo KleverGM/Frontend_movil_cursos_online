@@ -205,7 +205,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           onSelected: (selected) {
             onSelected(selected ? item : null);
           },
-          selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
+          selectedColor: Theme.of(context).primaryColor.withOpacity( 0.2),
           checkmarkColor: Theme.of(context).primaryColor,
         );
       }).toList(),

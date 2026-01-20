@@ -80,7 +80,7 @@ class _ReplyReviewDialogState extends State<ReplyReviewDialog> {
                 Text(
                   'Tu respuesta será visible para todos los estudiantes',
                   style: TextStyle(
-                    color: Colors.grey[600],
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
                     fontSize: 14,
                   ),
                 ),
@@ -89,13 +89,14 @@ class _ReplyReviewDialogState extends State<ReplyReviewDialog> {
                 // Campo de respuesta
                 TextFormField(
                   controller: _respuestaController,
+                  style: Theme.of(context).textTheme.bodyLarge,
                   decoration: InputDecoration(
                     hintText: 'Escribe tu respuesta...',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     filled: true,
-                    fillColor: Colors.grey[50],
+                    fillColor: Theme.of(context).cardColor,
                   ),
                   maxLines: 5,
                   maxLength: 500,

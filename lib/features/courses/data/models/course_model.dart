@@ -18,9 +18,16 @@ class CourseModel extends Course {
     super.totalSecciones,
     super.duracionTotal,
     super.totalEstudiantes,
+    super.instructorNombre,
+    super.calificacionPromedio,
+    super.progreso,
   });
 
   factory CourseModel.fromJson(Map<String, dynamic> json) {
+    final instructor = json['instructor'] != null
+        ? InstructorModel.fromJson(json['instructor'] as Map<String, dynamic>)
+        : null;
+    
     return CourseModel(
       id: json['id'] as int,
       titulo: json['titulo'] as String,
@@ -28,9 +35,7 @@ class CourseModel extends Course {
       categoria: json['categoria'] as String,
       nivel: json['nivel'] as String,
       fechaCreacion: DateTime.parse(json['fecha_creacion'] as String),
-      instructor: json['instructor'] != null
-          ? InstructorModel.fromJson(json['instructor'] as Map<String, dynamic>)
-          : null,
+      instructor: instructor,
       precio: (json['precio'] is String)
           ? double.parse(json['precio'] as String)
           : (json['precio'] as num).toDouble(),
@@ -40,6 +45,14 @@ class CourseModel extends Course {
       totalSecciones: json['total_secciones'] as int? ?? 0,
       duracionTotal: json['duracion_total'] as int? ?? 0,
       totalEstudiantes: json['total_estudiantes'] as int? ?? 0,
+      instructorNombre: instructor != null 
+          ? '${instructor.firstName} ${instructor.lastName}'.trim()
+          : null,
+      progreso: json['progreso'] != null
+          ? (json['progreso'] is String
+              ? double.tryParse(json['progreso'] as String)
+              : (json['progreso'] as num).toDouble())
+          : null,
     );
   }
 
@@ -80,6 +93,8 @@ class CourseModel extends Course {
       totalSecciones: course.totalSecciones,
       duracionTotal: course.duracionTotal,
       totalEstudiantes: course.totalEstudiantes,
+      instructorNombre: course.instructorNombre,
+      calificacionPromedio: course.calificacionPromedio,
     );
   }
 }

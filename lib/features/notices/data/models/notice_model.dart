@@ -10,17 +10,19 @@ class NoticeModel extends Notice {
     required super.fechaCreacion,
     required super.leido,
     required super.usuarioId,
+    super.importante = false,
   });
 
   factory NoticeModel.fromJson(Map<String, dynamic> json) {
     return NoticeModel(
       id: json['id'] as int,
       titulo: json['titulo'] as String,
-      mensaje: json['mensaje'] as String,
+      mensaje: json['mensaje'] ?? json['descripcion'] as String,
       tipo: NoticeType.fromString(json['tipo'] as String),
       fechaCreacion: DateTime.parse(json['fecha_creacion'] as String),
       leido: json['leido'] as bool? ?? false,
-      usuarioId: json['usuario'] as int,
+      usuarioId: json['usuario'] is Map ? json['usuario']['id'] as int : json['usuario'] as int,
+      importante: json['importante'] as bool? ?? false,
     );
   }
 
@@ -28,11 +30,12 @@ class NoticeModel extends Notice {
     return {
       'id': id,
       'titulo': titulo,
-      'mensaje': mensaje,
+      'descripcion': mensaje,
       'tipo': tipo.toBackendString(),
       'fecha_creacion': fechaCreacion.toIso8601String(),
       'leido': leido,
       'usuario': usuarioId,
+      'importante': importante,
     };
   }
 
@@ -45,6 +48,7 @@ class NoticeModel extends Notice {
       fechaCreacion: notice.fechaCreacion,
       leido: notice.leido,
       usuarioId: notice.usuarioId,
+      importante: notice.importante,
     );
   }
 }

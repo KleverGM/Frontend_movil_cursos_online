@@ -45,7 +45,7 @@ class InstructorSectionCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: _getIconColor(context).withOpacity(0.1),
+                      color: _getIconColor(context).withOpacity( 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(

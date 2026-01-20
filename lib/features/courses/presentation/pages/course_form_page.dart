@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../../../core/di/injection.dart';
 import '../../domain/entities/course.dart';
 import '../../domain/entities/course_input.dart';
 import '../bloc/course_bloc.dart';
@@ -222,7 +221,7 @@ class _CourseFormPageState extends State<CourseFormPage> {
 
                 // Categoría
                 DropdownButtonFormField<String>(
-                  value: _courseInput.categoria,
+                  initialValue: _courseInput.categoria,
                   decoration: const InputDecoration(
                     labelText: 'Categoría *',
                     border: OutlineInputBorder(),
@@ -250,7 +249,7 @@ class _CourseFormPageState extends State<CourseFormPage> {
 
                 // Nivel
                 DropdownButtonFormField<String>(
-                  value: _courseInput.nivel,
+                  initialValue: _courseInput.nivel,
                   decoration: const InputDecoration(
                     labelText: 'Nivel *',
                     border: OutlineInputBorder(),

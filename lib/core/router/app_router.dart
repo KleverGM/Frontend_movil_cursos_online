@@ -3,35 +3,47 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/auth/presentation/pages/splash_page.dart';
+import '../../features/auth/presentation/pages/welcome_page.dart';
 import '../../features/courses/domain/entities/course_detail.dart';
 import '../../features/courses/presentation/pages/course_content_page.dart';
 import '../../features/courses/presentation/pages/course_detail_page.dart';
-import '../../features/courses/presentation/pages/courses_page.dart';
+import '../../features/courses/presentation/pages/guest_course_detail_page.dart';
+import '../../features/courses/presentation/pages/guest_courses_page.dart';
 import '../../features/courses/presentation/pages/my_courses_page.dart';
 import '../../features/home/presentation/pages/adaptive_main_layout.dart';
 
 /// Rutas de la aplicación
 class AppRoutes {
+  static const String splash = '/';
+  static const String welcome = '/welcome';
   static const String login = '/login';
   static const String register = '/register';
   static const String home = '/home';
-  static const String splash = '/';
   static const String courses = '/courses';
   static const String myCourses = '/my-courses';
+  static const String guestCourses = '/guest/courses';
   static String courseDetail(int id) => '/courses/$id';
   static String courseContent(int id) => '/courses/$id/content';
+  static String guestCourseDetail(int id) => '/guest/courses/$id';
 }
 
 /// Configuración del router
 class AppRouter {
   static final GoRouter router = GoRouter(
-    initialLocation: AppRoutes.login,
+    initialLocation: AppRoutes.splash,
     debugLogDiagnostics: true,
     routes: [
-      // Splash / Initial
+      // Splash - Verificación de autenticación
       GoRoute(
         path: AppRoutes.splash,
-        builder: (context, state) => const LoginPage(),
+        builder: (context, state) => const SplashPage(),
+      ),
+
+      // Welcome / Initial
+      GoRoute(
+        path: AppRoutes.welcome,
+        builder: (context, state) => const WelcomePage(),
       ),
 
       // Auth Routes
@@ -48,6 +60,19 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.home,
         builder: (context, state) => const AdaptiveMainLayout(),
+      ),
+
+      // Guest Routes - Cursos sin autenticación
+      GoRoute(
+        path: AppRoutes.guestCourses,
+        builder: (context, state) => const GuestCoursesPage(),
+      ),
+      GoRoute(
+        path: '/guest/courses/:id',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return GuestCourseDetailPage(courseId: id);
+        },
       ),
 
       // Courses Routes - CourseDetail y Content son páginas independientes

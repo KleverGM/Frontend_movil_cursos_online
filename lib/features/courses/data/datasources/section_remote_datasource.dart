@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_client.dart';
 import '../models/section_model.dart';
@@ -12,6 +13,7 @@ abstract class SectionRemoteDataSource {
     required String titulo,
     required String contenido,
     String? videoUrl,
+    PlatformFile? videoFile,
     String? archivoPath,
     required int orden,
     required int duracionMinutos,
@@ -22,6 +24,7 @@ abstract class SectionRemoteDataSource {
     required String titulo,
     required String contenido,
     String? videoUrl,
+    PlatformFile? videoFile,
     String? archivoPath,
     required int orden,
     required int duracionMinutos,
@@ -69,14 +72,15 @@ class SectionRemoteDataSourceImpl implements SectionRemoteDataSource {
     required String titulo,
     required String contenido,
     String? videoUrl,
+    PlatformFile? videoFile,
     String? archivoPath,
     required int orden,
     required int duracionMinutos,
     bool esPreview = false,
   }) async {
     try {
-      // Si hay archivo, usar FormData
-      if (archivoPath != null && archivoPath.isNotEmpty) {
+      // Si hay video file o archivo, usar FormData
+      if ((videoFile != null) || (archivoPath != null && archivoPath.isNotEmpty)) {
         final formData = FormData.fromMap({
           'modulo': moduloId,
           'titulo': titulo,
@@ -84,12 +88,43 @@ class SectionRemoteDataSourceImpl implements SectionRemoteDataSource {
           'orden': orden,
           'duracion_minutos': duracionMinutos,
           'es_preview': esPreview,
-          'archivo': await MultipartFile.fromFile(
-            archivoPath,
-            filename: archivoPath.split('/').last,
-          ),
         });
 
+        // Agregar video file si existe
+        if (videoFile != null) {
+          if (videoFile.path != null) {
+            // Plataformas con path (Android, iOS)
+            formData.files.add(MapEntry(
+              'video_file',
+              await MultipartFile.fromFile(
+                videoFile.path!,
+                filename: videoFile.name,
+              ),
+            ));
+          } else if (videoFile.bytes != null) {
+            // Web - usar bytes
+            formData.files.add(MapEntry(
+              'video_file',
+              MultipartFile.fromBytes(
+                videoFile.bytes!,
+                filename: videoFile.name,
+              ),
+            ));
+          }
+        }
+
+        // Agregar archivo si existe
+        if (archivoPath != null && archivoPath.isNotEmpty) {
+          formData.files.add(MapEntry(
+            'archivo',
+            await MultipartFile.fromFile(
+              archivoPath,
+              filename: archivoPath.split('/').last,
+            ),
+          ));
+        }
+
+        // Agregar URL si existe
         if (videoUrl != null && videoUrl.isNotEmpty) {
           formData.fields.add(MapEntry('video_url', videoUrl));
         }
@@ -133,26 +168,58 @@ class SectionRemoteDataSourceImpl implements SectionRemoteDataSource {
     required String titulo,
     required String contenido,
     String? videoUrl,
+    PlatformFile? videoFile,
     String? archivoPath,
     required int orden,
     required int duracionMinutos,
     bool esPreview = false,
   }) async {
     try {
-      // Si hay archivo, usar FormData
-      if (archivoPath != null && archivoPath.isNotEmpty && File(archivoPath).existsSync()) {
+      // Si hay video file o archivo, usar FormData
+      if ((videoFile != null) || (archivoPath != null && archivoPath.isNotEmpty && File(archivoPath).existsSync())) {
         final formData = FormData.fromMap({
           'titulo': titulo,
           'contenido': contenido,
           'orden': orden,
           'duracion_minutos': duracionMinutos,
           'es_preview': esPreview,
-          'archivo': await MultipartFile.fromFile(
-            archivoPath,
-            filename: archivoPath.split('/').last,
-          ),
         });
 
+        // Agregar video file si existe
+        if (videoFile != null) {
+          if (videoFile.path != null) {
+            // Plataformas con path
+            formData.files.add(MapEntry(
+              'video_file',
+              await MultipartFile.fromFile(
+                videoFile.path!,
+                filename: videoFile.name,
+              ),
+            ));
+          } else if (videoFile.bytes != null) {
+            // Web
+            formData.files.add(MapEntry(
+              'video_file',
+              MultipartFile.fromBytes(
+                videoFile.bytes!,
+                filename: videoFile.name,
+              ),
+            ));
+          }
+        }
+
+        // Agregar archivo si existe
+        if (archivoPath != null && archivoPath.isNotEmpty) {
+          formData.files.add(MapEntry(
+            'archivo',
+            await MultipartFile.fromFile(
+              archivoPath,
+              filename: archivoPath.split('/').last,
+            ),
+          ));
+        }
+
+        // Agregar URL si existe
         if (videoUrl != null && videoUrl.isNotEmpty) {
           formData.fields.add(MapEntry('video_url', videoUrl));
         }

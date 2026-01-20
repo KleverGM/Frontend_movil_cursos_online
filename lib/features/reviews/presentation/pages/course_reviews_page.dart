@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/widgets/states/common_states.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../domain/entities/review.dart';
@@ -144,7 +145,7 @@ class CourseReviewsPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.1),
+        color: Theme.of(context).primaryColor.withOpacity( 0.1),
         border: Border(
           bottom: BorderSide(color: Colors.grey.shade300),
         ),
@@ -190,23 +191,10 @@ class CourseReviewsPage extends StatelessWidget {
   }
 
   Widget _buildEmptyState() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.rate_review_outlined, size: 80, color: Colors.grey),
-          SizedBox(height: 16),
-          Text(
-            'Aún no hay reseñas',
-            style: TextStyle(fontSize: 18, color: Colors.grey),
-          ),
-          SizedBox(height: 8),
-          Text(
-            '¡Sé el primero en compartir tu opinión!',
-            style: TextStyle(color: Colors.grey),
-          ),
-        ],
-      ),
+    return const EmptyStateWidget(
+      icon: Icons.rate_review_outlined,
+      title: 'Aún no hay reseñas',
+      message: '¡Sé el primero en compartir tu opinión!',
     );
   }
 

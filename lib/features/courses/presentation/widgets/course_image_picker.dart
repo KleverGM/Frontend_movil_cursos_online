@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 /// Widget reutilizable para seleccionar imagen del curso
 class CourseImagePicker extends StatelessWidget {

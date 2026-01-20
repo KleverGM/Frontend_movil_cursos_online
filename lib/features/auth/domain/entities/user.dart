@@ -1,13 +1,12 @@
 import 'package:equatable/equatable.dart';
 
-/// Entidad de usuario en la capa de dominio
 class User extends Equatable {
   final int id;
   final String email;
   final String username;
   final String? firstName;
   final String? lastName;
-  final String perfil; // estudiante, instructor, administrador
+  final String perfil; 
   final bool isActive;
   final DateTime fechaCreacion;
 

@@ -209,7 +209,7 @@ class InstructorCourseCard extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          '${course.totalEstudiantes ?? 0} estudiantes',
+          '${course.totalEstudiantes} estudiantes',
           style: theme.textTheme.labelMedium,
         ),
         const SizedBox(width: 16),
@@ -220,10 +220,10 @@ class InstructorCourseCard extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          '${course.totalSecciones ?? 0} lecciones',
+          '${course.totalSecciones} lecciones',
           style: theme.textTheme.labelMedium,
         ),
-        if (course.duracionTotal > 0) ...[
+        if ((course.duracionTotal) > 0) ...[
           const SizedBox(width: 16),
           Icon(
             Icons.access_time,
@@ -232,7 +232,7 @@ class InstructorCourseCard extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            course.duracionFormateada,
+            (course.duracionFormateada),
             style: theme.textTheme.labelMedium,
           ),
         ],
@@ -310,7 +310,7 @@ class InstructorCourseCard extends StatelessWidget {
               },
               icon: const Icon(Icons.people, size: 18),
               label: Text(
-                '${course.totalEstudiantes ?? 0}',
+                '${course.totalEstudiantes}',
                 style: const TextStyle(fontSize: 13),
               ),
               style: TextButton.styleFrom(

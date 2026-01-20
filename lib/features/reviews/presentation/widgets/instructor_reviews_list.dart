@@ -90,16 +90,16 @@ class InstructorReviewsList extends StatelessWidget {
               'Tu respuesta:',
               style: TextStyle(
                 fontWeight: FontWeight.w500,
-                color: Colors.grey[700],
+                color: Theme.of(context).textTheme.bodyMedium?.color,
               ),
             ),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey[50],
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[300]!),
+                border: Border.all(color: Theme.of(context).dividerColor),
               ),
               child: Text(review.respuestaInstructorActual!),
             ),
@@ -139,14 +139,14 @@ class InstructorReviewsList extends StatelessWidget {
               'Reseña de ${review.estudianteNombre}:',
               style: TextStyle(
                 fontWeight: FontWeight.w500,
-                color: Colors.grey[700],
+                color: Theme.of(context).textTheme.bodyMedium?.color,
               ),
             ),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey[50],
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(review.comentario),
@@ -154,12 +154,15 @@ class InstructorReviewsList extends StatelessWidget {
             const SizedBox(height: 16),
             TextField(
               controller: controller,
+              style: Theme.of(context).textTheme.bodyLarge,
               maxLines: 3,
               decoration: InputDecoration(
                 hintText: 'Escribe tu respuesta...',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
+                filled: true,
+                fillColor: Theme.of(context).cardColor,
               ),
             ),
           ],

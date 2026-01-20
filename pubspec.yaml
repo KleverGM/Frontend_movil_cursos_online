@@ -49,6 +49,7 @@ dependencies:
   # Video Player
   video_player: ^2.8.2
   chewie: ^1.7.5
+  youtube_player_flutter: ^9.0.3
   wakelock_plus: ^1.1.4
 
   # Push Notifications & WebSocket

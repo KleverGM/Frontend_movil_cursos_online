@@ -9,6 +9,7 @@ class Notice extends Equatable {
   final DateTime fechaCreacion;
   final bool leido;
   final int usuarioId;
+  final bool importante;
 
   const Notice({
     required this.id,
@@ -18,6 +19,7 @@ class Notice extends Equatable {
     required this.fechaCreacion,
     required this.leido,
     required this.usuarioId,
+    this.importante = false,
   });
 
   @override
@@ -29,6 +31,7 @@ class Notice extends Equatable {
         fechaCreacion,
         leido,
         usuarioId,
+        importante,
       ];
 }
 

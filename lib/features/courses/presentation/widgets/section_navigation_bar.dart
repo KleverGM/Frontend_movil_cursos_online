@@ -22,7 +22,7 @@ class SectionNavigationBar extends StatelessWidget {
         color: Theme.of(context).cardColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withOpacity( 0.1),
             blurRadius: 4,
             offset: const Offset(0, -2),
           ),
@@ -39,7 +39,7 @@ class SectionNavigationBar extends StatelessWidget {
             icon: const Icon(Icons.chevron_left),
             label: const Text('Anterior'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey[300],
+              backgroundColor: Theme.of(context).dividerColor,
               foregroundColor: Colors.black87,
             ),
           ),

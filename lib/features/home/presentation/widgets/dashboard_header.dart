@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../core/router/app_router.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../pages/main_layout.dart';
@@ -28,7 +26,7 @@ class DashboardHeader extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: [
                 Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withOpacity(0.7),
+                Theme.of(context).primaryColor.withOpacity( 0.7),
               ],
             ),
           ),
@@ -59,7 +57,6 @@ class DashboardHeader extends StatelessWidget {
                 onTap: () {
                   // Cambiar a la pestaña de perfil usando el índice del BottomNavigationBar
                   // El ProfilePage está en el índice 3 del MainLayout
-                  final scaffold = Scaffold.of(context);
                   // Como estamos dentro de MainLayout, necesitamos acceder al state
                   // Buscamos el ancestro MainLayout y cambiamos su índice
                   context.findAncestorStateOfType<MainLayoutState>()?.changeTab(3);

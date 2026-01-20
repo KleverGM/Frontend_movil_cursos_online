@@ -39,7 +39,7 @@ class FilterChips extends StatelessWidget {
                     label: option.label,
                     icon: option.icon,
                     isSelected: selectedFilter == option.id,
-                    onSelected: () => onFilterChanged(option.id),
+                    onTap: () => onFilterChanged(option.id),
                   ),
                 ))
             .toList(),
@@ -53,14 +53,14 @@ class FilterChipWidget extends StatelessWidget {
   final String label;
   final IconData? icon;
   final bool isSelected;
-  final VoidCallback onSelected;
+  final VoidCallback onTap;
 
   const FilterChipWidget({
     super.key,
     required this.label,
     this.icon,
     required this.isSelected,
-    required this.onSelected,
+    required this.onTap,
   });
 
   @override
@@ -77,8 +77,8 @@ class FilterChipWidget extends StatelessWidget {
         ],
       ),
       selected: isSelected,
-      onSelected: (_) => onSelected(),
-      selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
+      onSelected: (_) => onTap(),
+      selectedColor: Theme.of(context).primaryColor.withOpacity( 0.2),
       checkmarkColor: Theme.of(context).primaryColor,
     );
   }

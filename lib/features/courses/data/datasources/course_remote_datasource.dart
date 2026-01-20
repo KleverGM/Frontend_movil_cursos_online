@@ -7,19 +7,15 @@ import '../models/course_model.dart';
 import '../models/enrollment_model.dart';
 import '../models/enrollment_detail_model.dart';
 import '../models/course_stats_model.dart';
+import '../models/global_stats_model.dart';
 
-/// DataSource remoto para cursos
 abstract class CourseRemoteDataSource {
-  /// Obtener lista de cursos con filtros
   Future<List<CourseModel>> getCourses({CourseFilters? filters});
 
-  /// Obtener detalle de un curso
   Future<CourseDetailModel> getCourseDetail(int courseId);
 
-  /// Inscribirse a un curso
   Future<EnrollmentModel> enrollInCourse(int courseId);
 
-  /// Obtener cursos inscritos del usuario
   Future<List<CourseModel>> getEnrolledCourses();
 
   /// Obtener cursos creados por el instructor
@@ -63,6 +59,9 @@ abstract class CourseRemoteDataSource {
   
   /// Obtener estadísticas detalladas de un curso
   Future<CourseStatsModel> getCourseStats(int courseId);
+  
+  /// Obtener estadísticas globales de la plataforma (solo administradores)
+  Future<GlobalStatsModel> getGlobalStats();
 }
 
 class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
@@ -89,7 +88,6 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
     );
 
     if (response.statusCode == 200) {
-      // La API devuelve un objeto con paginación: {count, next, previous, results}
       final responseData = response.data as Map<String, dynamic>;
       final List<dynamic> data = responseData['results'] as List<dynamic>;
       return data.map((json) => CourseModel.fromJson(json as Map<String, dynamic>)).toList();
@@ -127,6 +125,9 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
   Future<List<CourseModel>> getEnrolledCourses() async {
     final response = await _apiClient.get(ApiConstants.enrolledCourses);
 
+    print('🔍 getEnrolledCourses - Status: ${response.statusCode}');
+    print('🔍 getEnrolledCourses - Data: ${response.data}');
+
     if (response.statusCode == 200) {
       // Verificar si la respuesta es paginada o un array directo
       final responseData = response.data;
@@ -135,22 +136,34 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
       if (responseData is Map<String, dynamic> && responseData.containsKey('results')) {
         // Respuesta paginada
         data = responseData['results'] as List<dynamic>;
-      } else {
+      } else if (responseData is List) {
         // Array directo
         data = responseData as List<dynamic>;
+      } else {
+        // Podría ser un objeto con key diferente o vacío
+        print('⚠️ Formato inesperado de respuesta: $responseData');
+        return [];
       }
       
+      print('🔍 Total inscripciones encontradas: ${data.length}');
+      
       // Las inscripciones vienen con objeto curso anidado
-      return data
+      final courses = data
           .map((json) {
             final enrollment = json as Map<String, dynamic>;
             if (enrollment['curso'] != null) {
-              return CourseModel.fromJson(enrollment['curso'] as Map<String, dynamic>);
+              // Agregar el progreso del enrollment al objeto curso
+              final cursoData = Map<String, dynamic>.from(enrollment['curso'] as Map<String, dynamic>);
+              cursoData['progreso'] = enrollment['progreso'];
+              return CourseModel.fromJson(cursoData);
             }
             return null;
           })
           .whereType<CourseModel>()
           .toList();
+      
+      print('🔍 Cursos procesados: ${courses.length}');
+      return courses;
     } else {
       throw Exception('Error al obtener cursos inscritos: ${response.statusCode}');
     }
@@ -181,13 +194,26 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
 
   @override
   Future<void> markSectionCompleted(int sectionId) async {
-    final response = await _apiClient.post(
-      ApiConstants.markSectionCompleted(sectionId),
-      data: {},
-    );
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.markSectionCompleted(sectionId),
+        data: {},
+      );
 
-    if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception('Error al marcar sección como completada: ${response.statusCode}');
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception('Error al marcar sección como completada: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        throw Exception('La conexión tardó demasiado. Verifica tu internet e intenta de nuevo.');
+      } else if (e.type == DioExceptionType.connectionError) {
+        throw Exception('No se pudo conectar al servidor. Verifica tu conexión a internet.');
+      }
+      throw Exception('Error al marcar sección como completada: ${e.message}');
+    } catch (e) {
+      throw Exception('Error inesperado al marcar sección: ${e.toString()}');
     }
   }
   
@@ -200,28 +226,27 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
     required double precio,
     String? imagenPath,
   }) async {
-    // Preparar datos del formulario
     final formData = <String, dynamic>{
       'titulo': titulo,
       'descripcion': descripcion,
       'categoria': categoria,
       'nivel': nivel,
       'precio': precio.toString(),
+      'activo': true,
     };
-    
-    // Si hay imagen, usar FormData para subir archivo
+
     if (imagenPath != null) {
       final dio = _apiClient.dio;
       final formDataDio = FormData.fromMap({
         ...formData,
         'imagen': await MultipartFile.fromFile(imagenPath),
       });
-      
+
       final response = await dio.post(
         ApiConstants.courses,
         data: formDataDio,
       );
-      
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         return CourseModel.fromJson(response.data as Map<String, dynamic>);
       } else {
@@ -233,7 +258,7 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
         ApiConstants.courses,
         data: formData,
       );
-      
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         return CourseModel.fromJson(response.data as Map<String, dynamic>);
       } else {
@@ -382,6 +407,88 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
       return CourseStatsModel.fromJson(response.data as Map<String, dynamic>);
     } else {
       throw Exception('Error al obtener estadísticas del curso: ${response.statusCode}');
+    }
+  }
+
+  @override
+  Future<GlobalStatsModel> getGlobalStats() async {
+    try {
+      final coursesResponse = await _apiClient.get(ApiConstants.courses);
+      final coursesData = coursesResponse.data as Map<String, dynamic>;
+      final int totalCursos = coursesData['count'] ?? 0;
+      final List<dynamic> cursos = coursesData['results'] as List<dynamic>;
+      
+      int totalEstudiantes = 0;
+      double totalIngresos = 0;
+      final Map<String, int> cursosPorCategoria = {};
+      final Map<int, Map<String, dynamic>> instructoresMap = {};
+      
+      for (var curso in cursos) {
+        final estudiantes = curso['total_estudiantes'] as int? ?? 0;
+        totalEstudiantes += estudiantes;
+        
+        final precioValue = curso['precio'];
+        double precio = 0.0;
+        if (precioValue is String) {
+          precio = double.tryParse(precioValue) ?? 0.0;
+        } else if (precioValue is num) {
+          precio = precioValue.toDouble();
+        }
+        totalIngresos += precio * estudiantes;
+        
+        final categoria = curso['categoria'] as String? ?? 'otros';
+        cursosPorCategoria[categoria] = (cursosPorCategoria[categoria] ?? 0) + 1;
+        
+        final instructor = curso['instructor'];
+        if (instructor is Map) {
+          final instructorId = instructor['id'] as int?;
+          if (instructorId != null) {
+            if (!instructoresMap.containsKey(instructorId)) {
+              String nombre = 'Instructor';
+              final firstName = instructor['first_name'];
+              final lastName = instructor['last_name'];
+              if (firstName != null && firstName.toString().isNotEmpty) {
+                nombre = '$firstName ${lastName ?? ''}'.trim();
+              } else if (instructor['username'] != null) {
+                nombre = instructor['username'].toString();
+              }
+              
+              instructoresMap[instructorId] = {
+                'id': instructorId,
+                'nombre': nombre,
+                'avatar': instructor['avatar'],
+                'total_cursos': 0,
+                'total_estudiantes': 0,
+                'calificacion_promedio': 4.5,
+              };
+            }
+            instructoresMap[instructorId]!['total_cursos'] = 
+                (instructoresMap[instructorId]!['total_cursos'] as int) + 1;
+            instructoresMap[instructorId]!['total_estudiantes'] = 
+                (instructoresMap[instructorId]!['total_estudiantes'] as int) + estudiantes;
+          }
+        }
+      }
+      
+      final topInstructores = instructoresMap.values.toList()
+        ..sort((a, b) => (b['total_estudiantes'] as int).compareTo(a['total_estudiantes'] as int));
+      
+      return GlobalStatsModel(
+        totalUsuarios: totalEstudiantes,
+        totalCursos: totalCursos,
+        totalInscripciones: totalEstudiantes,
+        totalIngresos: totalIngresos.toInt(),
+        tasaCrecimientoUsuarios: 0.0,
+        tasaCrecimientoCursos: 0.0,
+        cursosPorCategoria: cursosPorCategoria,
+        crecimientoUsuarios: [],
+        topInstructores: topInstructores.take(5).map((e) => 
+          InstructorTopModel.fromJson(e)
+        ).toList(),
+        actividadReciente: [],
+      );
+    } catch (e) {
+      throw Exception('Error al obtener estadísticas globales: $e');
     }
   }
 }

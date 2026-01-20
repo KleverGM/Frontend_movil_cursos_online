@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/usecases/usecase.dart';
 import '../../domain/usecases/create_review.dart';
 import '../../domain/usecases/delete_review.dart';
+import '../../domain/usecases/get_all_reviews.dart';
 import '../../domain/usecases/get_course_review_stats.dart';
 import '../../domain/usecases/get_course_reviews.dart';
 import '../../domain/usecases/get_my_reviews.dart';
@@ -18,6 +20,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
   final MarkReviewHelpful _markReviewHelpful;
   final DeleteReview _deleteReview;
   final ReplyToReview _replyToReview;
+  final GetAllReviewsUseCase _getAllReviews;
 
   ReviewBloc(
     this._getCourseReviews,
@@ -27,6 +30,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     this._markReviewHelpful,
     this._deleteReview,
     this._replyToReview,
+    this._getAllReviews,
   ) : super(const ReviewInitial()) {
     on<GetCourseReviewsEvent>(_onGetCourseReviews);
     on<GetCourseReviewStatsEvent>(_onGetCourseReviewStats);
@@ -35,6 +39,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     on<MarkReviewHelpfulEvent>(_onMarkReviewHelpful);
     on<DeleteReviewEvent>(_onDeleteReview);
     on<ReplyToReviewEvent>(_onReplyToReview);
+    on<GetAllReviewsEvent>(_onGetAllReviews);
   }
 
   Future<void> _onGetCourseReviews(
@@ -145,7 +150,21 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
 
     result.fold(
       (failure) => emit(ReviewError(failure.message)),
-      (reviews) => emit(ReviewsLoaded(reviews)),
+      (reviews) => emit(MyReviewsLoaded(reviews)),
+    );
+  }
+  
+  Future<void> _onGetAllReviews(
+    GetAllReviewsEvent event,
+    Emitter<ReviewState> emit,
+  ) async {
+    emit(const ReviewLoading());
+
+    final result = await _getAllReviews.execute(NoParams());
+
+    result.fold(
+      (failure) => emit(ReviewError(failure.message)),
+      (reviews) => emit(AllReviewsLoaded(reviews)),
     );
   }
 }

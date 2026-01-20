@@ -45,7 +45,7 @@ class InstructorModuleCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: theme.primaryColor.withOpacity(0.1),
+                      color: theme.primaryColor.withOpacity( 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(

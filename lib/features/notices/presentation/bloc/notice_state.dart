@@ -60,3 +60,31 @@ class NoticeError extends NoticeState {
   @override
   List<Object> get props => [message];
 }
+
+// Estados para administradores
+class AllNoticesLoaded extends NoticeState {
+  final List<Notice> notices;
+
+  const AllNoticesLoaded(this.notices);
+
+  @override
+  List<Object> get props => [notices];
+}
+
+class NoticeUpdated extends NoticeState {
+  final Notice notice;
+
+  const NoticeUpdated(this.notice);
+
+  @override
+  List<Object> get props => [notice];
+}
+
+class BroadcastNoticesCreated extends NoticeState {
+  final List<Notice> notices;
+
+  const BroadcastNoticesCreated(this.notices);
+
+  @override
+  List<Object> get props => [notices];
+}

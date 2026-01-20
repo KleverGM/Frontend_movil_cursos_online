@@ -6,6 +6,7 @@ import '../entities/course_filters.dart';
 import '../entities/enrollment.dart';
 import '../entities/enrollment_detail.dart';
 import '../entities/course_stats.dart';
+import '../entities/global_stats.dart';
 
 /// Interfaz del repositorio de cursos
 abstract class CourseRepository {
@@ -62,4 +63,7 @@ abstract class CourseRepository {
   
   /// Obtener estadísticas detalladas de un curso
   Future<Either<Failure, CourseStats>> getCourseStats(int courseId);
+  
+  /// Obtener estadísticas globales de la plataforma (solo administradores)
+  Future<Either<Failure, GlobalStats>> getGlobalStats();
 }

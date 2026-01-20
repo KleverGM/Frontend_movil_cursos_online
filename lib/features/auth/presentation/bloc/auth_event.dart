@@ -54,6 +54,36 @@ class RegisterRequested extends AuthEvent {
 /// Evento de logout
 class LogoutRequested extends AuthEvent {}
 
+class ChangePasswordRequested extends AuthEvent {
+  final String currentPassword;
+  final String newPassword;
+
+  const ChangePasswordRequested({
+    required this.currentPassword,
+    required this.newPassword,
+  });
+
+  @override
+  List<Object?> get props => [currentPassword, newPassword];
+}
+
+/// Evento para actualizar perfil
+class UpdateProfileRequested extends AuthEvent {
+  final String? firstName;
+  final String? lastName;
+  final String? username;
+
+  const UpdateProfileRequested({
+    this.firstName,
+    this.lastName,
+    this.username,
+  });
+
+  @override
+  List<Object?> get props => [firstName, lastName, username];
+}
+
+
 /// Evento para verificar autenticación
 class CheckAuthenticationStatus extends AuthEvent {}
 

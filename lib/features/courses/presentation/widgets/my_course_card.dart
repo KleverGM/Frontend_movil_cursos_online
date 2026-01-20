@@ -90,7 +90,7 @@ class MyCourseCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withOpacity(0.7),
+            Theme.of(context).primaryColor.withOpacity( 0.7),
           ],
         ),
       ),
@@ -159,7 +159,7 @@ class MyCourseCard extends StatelessWidget {
     return LinearProgressIndicator(
       value: progreso / 100,
       minHeight: 6,
-      backgroundColor: Colors.grey[300],
+      backgroundColor: Theme.of(context).dividerColor,
       valueColor: AlwaysStoppedAnimation<Color>(
         progreso == 100 ? Colors.green : Theme.of(context).primaryColor,
       ),

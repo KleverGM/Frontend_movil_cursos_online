@@ -36,19 +36,28 @@ class _VideoPlayerDialogState extends State<VideoPlayerDialog> {
       
       // Si es YouTube, intentar extraer el ID del video
       if (videoUrl.contains('youtube.com') || videoUrl.contains('youtu.be')) {
-        // Para YouTube necesitarías un paquete especial o una API
-        // Por ahora mostramos mensaje para usar URL directa de video
         setState(() {
-          _error = 'Para videos de YouTube, usa una URL directa del video (.mp4, .m3u8, etc.) '
-              'o abre en YouTube app';
+          _error = 'Para videos de YouTube:\n\n'
+              '1. Copia el enlace del video\n'
+              '2. Usa el botón "Abrir" para verlo en YouTube\n\n'
+              'O usa una URL directa de video (.mp4, .m3u8, etc.)';
           _isLoading = false;
         });
         return;
       }
 
-      _videoPlayerController = VideoPlayerController.networkUrl(
-        Uri.parse(videoUrl),
-      );
+      // Validar que la URL sea válida
+      final uri = Uri.tryParse(videoUrl);
+      if (uri == null || !uri.hasScheme) {
+        setState(() {
+          _error = 'URL de video no válida.\n\nURL recibida: $videoUrl\n\n'
+              'Debe ser una URL completa (http://... o https://...)';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      _videoPlayerController = VideoPlayerController.networkUrl(uri);
 
       await _videoPlayerController.initialize();
 
@@ -59,22 +68,35 @@ class _VideoPlayerDialogState extends State<VideoPlayerDialog> {
         aspectRatio: _videoPlayerController.value.aspectRatio,
         errorBuilder: (context, errorMessage) {
           return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error, color: Colors.red, size: 48),
-                const SizedBox(height: 16),
-                Text(
-                  'Error al cargar el video',
-                  style: TextStyle(color: Colors.red),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  errorMessage,
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error, color: Colors.red, size: 48),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Error al cargar el video',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    errorMessage,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Verifica:\n• La URL del video es correcta\n• El archivo existe en el servidor\n• Tienes conexión a internet',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -85,7 +107,11 @@ class _VideoPlayerDialogState extends State<VideoPlayerDialog> {
       });
     } catch (e) {
       setState(() {
-        _error = e.toString();
+        _error = 'Error al inicializar el reproductor:\n\n${e.toString()}\n\n'
+            'URL: ${widget.videoUrl}\n\n'
+            'Sugerencias:\n'
+            '• Verifica que la URL sea una URL directa de video\n'
+            '• Intenta abrir el video con el botón "Abrir"';
         _isLoading = false;
       });
     }

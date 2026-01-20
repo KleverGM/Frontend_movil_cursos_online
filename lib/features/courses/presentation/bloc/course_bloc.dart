@@ -133,13 +133,26 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
     GetEnrolledCoursesEvent event,
     Emitter<CourseState> emit,
   ) async {
+    print('🎯 BLOC: _onGetEnrolledCourses iniciado');
     emit(const CourseLoading());
+    print('🎯 BLOC: Estado CourseLoading emitido');
 
     final result = await _getEnrolledCoursesUseCase(NoParams());
+    print('🎯 BLOC: UseCase completado');
 
     result.fold(
-      (failure) => emit(CourseError(failure.message)),
-      (courses) => emit(EnrolledCoursesLoaded(courses)),
+      (failure) {
+        print('❌ BLOC: Error - ${failure.message}');
+        emit(CourseError(failure.message));
+      },
+      (courses) {
+        print('✅ BLOC: Éxito - ${courses.length} cursos recibidos');
+        for (var i = 0; i < courses.length; i++) {
+          print('   Curso $i: ${courses[i].titulo} (ID: ${courses[i].id})');
+        }
+        emit(EnrolledCoursesLoaded(courses));
+        print('✅ BLOC: Estado EnrolledCoursesLoaded emitido');
+      },
     );
   }
 
@@ -198,7 +211,11 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
 
     result.fold(
       (failure) => emit(CourseError(failure.message)),
-      (course) => emit(CourseCreatedSuccess(course)),
+      (course) {
+        emit(CourseCreatedSuccess(course));
+        // Recargar la lista de cursos del instructor después de crear
+        add(const GetMyCoursesEvent());
+      },
     );
   }
 
@@ -222,7 +239,11 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
 
     result.fold(
       (failure) => emit(CourseError(failure.message)),
-      (course) => emit(CourseUpdatedSuccess(course)),
+      (course) {
+        emit(CourseUpdatedSuccess(course));
+        // Recargar la lista de cursos del instructor después de actualizar
+        add(const GetMyCoursesEvent());
+      },
     );
   }
 
@@ -238,7 +259,11 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
 
     result.fold(
       (failure) => emit(CourseError(failure.message)),
-      (_) => emit(CourseDeletedSuccess(event.courseId)),
+      (_) {
+        emit(CourseDeletedSuccess(event.courseId));
+        // Recargar la lista de cursos del instructor después de eliminar
+        add(const GetMyCoursesEvent());
+      },
     );
   }
 

@@ -26,4 +26,24 @@ abstract class NoticeRepository {
   
   /// Obtener avisos no leídos
   Future<Either<Failure, int>> getUnreadCount();
+  
+  // Métodos para administradores
+  /// Obtener todos los avisos del sistema (admin)
+  Future<Either<Failure, List<Notice>>> getAllNotices();
+  
+  /// Actualizar un aviso (admin)
+  Future<Either<Failure, Notice>> updateNotice({
+    required int noticeId,
+    String? titulo,
+    String? mensaje,
+    NoticeType? tipo,
+  });
+  
+  /// Crear avisos broadcast para múltiples usuarios (admin)
+  Future<Either<Failure, List<Notice>>> createBroadcastNotice({
+    required String titulo,
+    required String mensaje,
+    required NoticeType tipo,
+    List<int>? usuarioIds, // Si es null, envía a todos
+  });
 }

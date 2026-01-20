@@ -104,4 +104,66 @@ class NoticeRepositoryImpl implements NoticeRepository {
       return const Left(NetworkFailure(message: 'No hay conexión a internet'));
     }
   }
+
+  @override
+  Future<Either<Failure, List<Notice>>> getAllNotices() async {
+    if (await _networkInfo.isConnected) {
+      try {
+        final notices = await _remoteDataSource.getAllNotices();
+        return Right(notices);
+      } catch (e) {
+        return Left(ServerFailure(message: e.toString()));
+      }
+    } else {
+      return const Left(NetworkFailure(message: 'No hay conexión a internet'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Notice>> updateNotice({
+    required int noticeId,
+    String? titulo,
+    String? mensaje,
+    NoticeType? tipo,
+  }) async {
+    if (await _networkInfo.isConnected) {
+      try {
+        final notice = await _remoteDataSource.updateNotice(
+          noticeId: noticeId,
+          titulo: titulo,
+          mensaje: mensaje,
+          tipo: tipo?.toBackendString(),
+        );
+        return Right(notice);
+      } catch (e) {
+        return Left(ServerFailure(message: e.toString()));
+      }
+    } else {
+      return const Left(NetworkFailure(message: 'No hay conexión a internet'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Notice>>> createBroadcastNotice({
+    required String titulo,
+    required String mensaje,
+    required NoticeType tipo,
+    List<int>? usuarioIds,
+  }) async {
+    if (await _networkInfo.isConnected) {
+      try {
+        final notices = await _remoteDataSource.createBroadcastNotice(
+          titulo: titulo,
+          mensaje: mensaje,
+          tipo: tipo.toBackendString(),
+          usuarioIds: usuarioIds,
+        );
+        return Right(notices);
+      } catch (e) {
+        return Left(ServerFailure(message: e.toString()));
+      }
+    } else {
+      return const Left(NetworkFailure(message: 'No hay conexión a internet'));
+    }
+  }
 }

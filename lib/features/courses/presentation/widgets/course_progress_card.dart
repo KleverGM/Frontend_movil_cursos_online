@@ -46,7 +46,7 @@ class CourseProgressCard extends StatelessWidget {
             LinearProgressIndicator(
               value: progreso / 100,
               minHeight: 8,
-              backgroundColor: Colors.grey[300],
+              backgroundColor: Theme.of(context).dividerColor,
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
             ),
           ],
